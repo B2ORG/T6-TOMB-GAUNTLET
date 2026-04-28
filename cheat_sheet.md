@@ -80,6 +80,7 @@ Set rounds: 8, 12, 16, 20, 24, 28, 30
 ## Powerups
 
 | Round | Behavior |
+| :---: | :--- |
 | 2 | Nukes are disabled |
 | 4 | First drop is double points (coop only) |
 | 9 | Nukes are disabled |
