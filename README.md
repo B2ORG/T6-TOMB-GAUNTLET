@@ -20,7 +20,9 @@ And paste the **[GSC file from most recent release](https://github.com/B2ORG/T6-
 
 # Beta
 
-This mod is (and is probably going to remain for a while) in beta, which means occasionally you may encounter some bugs. In that case, please report them either in [GitHub issues section](https://github.com/B2ORG/T6-TOMB-GAUNTLET/issues) or on [B2 Discord](b2.wtf/discord)
+This mod is (and is probably going to remain for a while) in beta, which means occasionally you may encounter some bugs. In that case, please report them either in [GitHub issues section](https://github.com/B2ORG/T6-TOMB-GAUNTLET/issues) or on [B2 Discord](b2.wtf/discord).
+
+In the current state, only Origins is supported.
 
 # Challenges
 
@@ -54,4 +56,5 @@ People who helped developing this mod, either by contributing code or testing st
 - [Tima](https://www.twitch.tv/t1malele)
 
 I used some of the old code from [Reimagined](https://github.com/Jbleezy/BO2-Reimagined) project for zone names
+
 And of course, the [Plutonium team](https://plutonium.pw/) for creating such a good client for modding stuff and helping triage some of the engine related errors i was encountering.
