@@ -36,6 +36,7 @@ main()
 {
     if (int(getsubstr(getdvar("shortversion"), 1)) < PLUTO_MINIMAL_VERSION)
     {
+        iprintln("The gauntlet patch minimal required Plutonium version is ^1r" + PLUTO_MINIMAL_VERSION);
         return;
     }
 
