@@ -206,7 +206,7 @@ Players must keep 100% headshot accuract through the round. If a zombie is hit i
 
 ## Round 6 - Monkey Challenge
 
-At least one zombie must be killed with a monkey bomb. Once completed, the next purchase equal to or above 500 points will be refunded.
+At least one zombie must be killed with a monkey bomb. Once completed, the next purchase equal to or above 500 points will be refunded. Also it automatically opens all teleports after round 16.
 
 ## Round 13 - Zone Challenge
 
