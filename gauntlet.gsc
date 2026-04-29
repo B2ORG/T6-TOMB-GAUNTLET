@@ -3108,43 +3108,34 @@ get_round_count()
 set_damageweapon(weapon)
 {
     TRACE(sstr(self) + " set_damageweapon " + sstr(weapon));
-    self._gauntlet_damageweapon = isdefined(weapon) ? weapon : "none";
+    gauntlet_damageweapon = isdefined(weapon) ? weapon : "none";
     if (is_true(self._cherry_damage))
     {
-        self._gauntlet_damageweapon = "specialty_grenadepulldeath";
+        gauntlet_damageweapon = "specialty_grenadepulldeath";
     }
     self._cherry_damage = undefined;
-    if (self._gauntlet_damageweapon == "none" && self.staff_dmg != "")
+    if (gauntlet_damageweapon == "none" && self.staff_dmg != "")
     {
-        self._gauntlet_damageweapon = self.staff_dmg;
+        gauntlet_damageweapon = self.staff_dmg;
     }
 
     if (!isdefined(self._gauntlet_damageweapon_history))
     {
         self._gauntlet_damageweapon_history = [];
     }
-    if (self._gauntlet_damageweapon_history.size > 64)
+    if (self._gauntlet_damageweapon_history.size > 32)
     {
         arrayremoveindex(self._gauntlet_damageweapon_history, 0, false);
     }
-    self._gauntlet_damageweapon_history[self._gauntlet_damageweapon_history.size] = self._gauntlet_damageweapon;
+    self._gauntlet_damageweapon_history[self._gauntlet_damageweapon_history.size] = gauntlet_damageweapon;
 }
 
 get_last_damageweapon(base = true, check_history = 1)
 {
     TRACE(sstr(self) + " get_last_damageweapon " + sstr(base) + " " + sstr(check_history));
-    if (!isdefined(self._gauntlet_damageweapon))
+    if (!self._gauntlet_damageweapon_history.size)
     {
-        // DEBUG("get_last_damageweapon: none");
         return "none";
-    }
-    if (self._gauntlet_damageweapon != "none" || check_history < 2)
-    {
-        damageweapon = base 
-            ? get_base_weapon_name(self._gauntlet_damageweapon, true) 
-            : self._gauntlet_damageweapon;
-        // DEBUG("get_last_damageweapon: " + sstr(damageweapon));
-        return damageweapon;
     }
 
     j = 1;
@@ -4039,7 +4030,7 @@ _restrict_guns_kill_check()
         default:
             last_damageweapon = get_last_damageweapon();
     }
-    // DEBUG("_restrict_guns_kill_check logic " + sstr(last_damageweapon));
+    DEBUG("_restrict_guns_kill_check logic " + sstr(last_damageweapon));
     if (!isinarray(level.gauntlet_allowed_guns, last_damageweapon))
     {
         WARN(sstr(self.attacker) + " used illegal weapon: " + sstr(last_damageweapon));
