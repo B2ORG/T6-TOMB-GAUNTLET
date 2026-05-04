@@ -228,6 +228,7 @@ setup_game()
             }
         }
 #endif
+        thread _dev_handle_doors();
     }
 #endif
 
@@ -1176,6 +1177,18 @@ no()
 {
     TRACE("no");
     return false;
+}
+
+trigger_blocker(a1, a2, a3, a4, a5)
+{
+    TRACE("trigger_blocker");
+    level endon("end_game");
+    flag_wait("initial_blackscreen_passed");
+    if (isdefined(self.script_flag))
+    {
+        flag_wait(self.script_flag);
+    }
+    self notify("trigger", a1, a2, a3, a4, a5);
 }
 
 disable_nukes_for_a_round()
@@ -2726,6 +2739,11 @@ _dump(object, f)
 {
     file = "b2gauntlet/dump_" + getutc() + "_" + randomint(10000) + ".json";
     f = isdefined(f) ? f : fs_fopen(file, "append");
+    if (!isdefined(f))
+    {
+        ERROR("Undefined file pointer for " + sstr(file));
+        return;
+    }
     fs_writeline(f, "{");
     DEBUG(typeof(object));
     switch (typeof(object))
@@ -2744,6 +2762,7 @@ _dump(object, f)
             break;
     }
     fs_writeline(f, "}");
+    fs_fclose(f);
 }
 
 eq(condition1, condition2)
@@ -2847,7 +2866,6 @@ json_encode(object, _depth = 0)
             }
             break;
         case "entity":
-        case "removed entity":
             proxy_object = [];
             foreach (e_key in object getfieldkeys())
             {
@@ -2954,6 +2972,10 @@ _entity_field(ent)
     if (isdefined(ent.entity_num) && ent.entity_num.size > 0)
     {
         return "entity_num=" + ent.entity_num;
+    }
+    if (isdefined(ent.targetname) && ent.targetname)
+    {
+        return "targetname=" + ent.targetname;
     }
     return "[" + sstr(ent getfieldkeys()) + "]";
 }
@@ -3200,7 +3222,7 @@ set_damageweapon(weapon)
         gauntlet_damageweapon = "specialty_grenadepulldeath";
     }
     self._cherry_damage = undefined;
-    if (gauntlet_damageweapon == "none" && self.staff_dmg != "")
+    if (gauntlet_damageweapon == "none" && isdefined(self.staff_dmg) && self.staff_dmg != "")
     {
         gauntlet_damageweapon = self.staff_dmg;
     }
@@ -3219,7 +3241,7 @@ set_damageweapon(weapon)
 get_last_damageweapon(base = true, check_history = 1)
 {
     TRACE(sstr(self) + " get_last_damageweapon " + sstr(base) + " " + sstr(check_history));
-    if (!self._gauntlet_damageweapon_history.size)
+    if (!isdefined(self._gauntlet_damageweapon_history) || !self._gauntlet_damageweapon_history.size)
     {
         return "none";
     }
@@ -6735,5 +6757,12 @@ zone_friendly_name(zone)
     return name + " (" + zone + ")";
 #else
     return name;
+#endif
+}
+
+_dev_handle_doors()
+{
+    TRACE("_dev_handle_doors");
+#ifdef DEV_OPEN_DOORS
 #endif
 }
