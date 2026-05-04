@@ -34,13 +34,6 @@
 
 main()
 {
-    if (int(getsubstr(getdvar("shortversion"), 1)) < PLUTO_MINIMAL_VERSION)
-    {
-        flag_wait("initial_blackscreen_passed");
-        iprintln("The gauntlet patch minimal required Plutonium version is ^1r" + PLUTO_MINIMAL_VERSION);
-        return;
-    }
-
     fn = getfunction("maps/mp/zombies/_zm_ai_mechz", "mechz_round_tracker");
     if (isdefined(fn))
     {
@@ -149,12 +142,7 @@ main()
 
 init()
 {
-    plutonium_version = int(getsubstr(getdvar("shortversion"), 1));
-    if (plutonium_version < PLUTO_MINIMAL_VERSION)
-    {
-        ERROR("Minimum Plutonium version to play gauntlet: " + PLUTO_MINIMAL_VERSION + ", yours: " + plutonium_version);
-        return;
-    }
+    validate_game();
 #ifdef ENABLE_TRACERS
     fs_remove("b2gauntlet/trace.log");
 #endif
@@ -616,6 +604,39 @@ set_status(status, new_hud_value, new_hud_color)
                 player set_status_hud_property(GAUNTLET_HUD_SET_COLOR, new_hud_color);
             }
         }
+    }
+}
+
+validate_game()
+{
+    TRACE("validate_game");
+    if (int(getsubstr(getdvar("shortversion"), 1)) < PLUTO_MINIMAL_VERSION)
+    {
+        flag_wait("initial_blackscreen_passed");
+        iprintln("The gauntlet minimal required Plutonium version is ^1r" + PLUTO_MINIMAL_VERSION);
+        ERROR("The gauntlet minimal required Plutonium version is ^1r" + PLUTO_MINIMAL_VERSION);
+        return;
+    }
+    if (getdvar("scr_allowfileio") != "1")
+    {
+        flag_wait("initial_blackscreen_passed");
+        iprintln("The 'scr_allowfileio' DVAR must be set to ^11");
+        ERROR("The 'scr_allowfileio' DVAR must be set to ^11");
+        return;
+    }
+    if (getdvar("fs_game") != "")
+    {
+        flag_wait("initial_blackscreen_passed");
+        iprintln("The current version of the Gauntlet does not support mods");
+        ERROR("The current version of the Gauntlet does not support mods");
+        return;
+    }
+    if (level.script != "zm_tomb")
+    {
+        flag_wait("initial_blackscreen_passed");
+        iprintln("This gauntlet only supports playing on Origins");
+        ERROR("This gauntlet only supports playing on Origins");
+        return;
     }
 }
 
