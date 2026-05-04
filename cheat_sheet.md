@@ -194,7 +194,7 @@ Guns are rolled on random interval between 10 and 16 seconds. The weapon has 1 i
 
 ## 30. Grand finale
 
-Same principle as round 20. Additionally, there are up to 2 panzers respawning throught the round, and natural powerups are disabled. Once the target zone is entered, in 45 second intervals the round "cycles", there are 4 cycles after which the logic repeats. First cycle respawns max ammo. Second respawns insta kill and zombie blood. Third cycle respawns max ammo, and gives eligible players a perk. If after receiving a random perk player has less than 4 perks, he gets one more. Fourth cycle respawns zombie blood, and if there are still zombies remaining to respawn, a nuke is respawned as well. Each cycle there are 20 zombies added to the round count (unless all zombies have respawned).
+Same principle as round 20. Additionally, there are up to 2 panzers respawning throught the round, and natural powerups are disabled. Once the target zone is entered, in 45 second intervals the round "cycles", there are 4 cycles after which the logic repeats. First cycle respawns max ammo. Second respawns insta kill and zombie blood. Third cycle respawns max ammo, and gives eligible players a perk. If after receiving a perk player has less than 4 perks, he gets one more. Fourth cycle respawns zombie blood, and if there are still zombies remaining to respawn, a nuke is respawned as well. Each cycle there are 20 zombies added to the round count (unless all zombies have respawned).
 
 # Side challenges
 
@@ -222,4 +222,5 @@ This challenge does not by itself require anything, instead it uses progress fro
 - One zombie blood per player on generator 6 if round 6 challenge has been completed
 - One zombie blood per player on either generator 2 or 3 if round 13 challenge has been completed
 - One zombie blood per player on either generator 4 or 5 if round 18 challenge has been completed
+
 The zombie blood powerups last until the end of the round.
