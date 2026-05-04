@@ -172,6 +172,8 @@ setup_game()
     setdvar("cg_flashScriptHashes", 1);
     setdvar("cg_drawIdentifier", 1);
 
+    level.b2_gauntlet_state = 0;
+
 #ifdef ENABLE_DEBUG
     if (getdvar("gauntlet_round") == "")
     {
@@ -200,12 +202,12 @@ setup_game()
 #ifdef DEV_SET_EASTEREGGS
         if (level.start_round > 6)
         {
-            level.gauntlet_side_ee_monkey = true;
+            b2_flag_set(FLAG_MONK_CHALLENGE);
             thread _refund_next_purchase();
         }
         if (level.start_round > 13)
         {
-            level.gauntlet_side_ee_zonekill_state = true;
+            b2_flag_set(FLAG_ZONE_CHALLENGE);
             thread upgrade_wallbuys();
         }
         if (level.start_round >= 19)
@@ -229,7 +231,6 @@ setup_game()
     }
 #endif
 
-    flag_init("gauntlet_hs_bonus_expired");
     flag_init("gauntlet_mechz_lock");
     flag_init("gauntlet_ee_r3");
     flag_init("gauntlet_ee_r6");
@@ -244,6 +245,7 @@ setup_game()
     register_zombie_damage_callback(::gauntlet_zombie_damage_callback);
     register_zombie_death_event_callback(::gauntlet_zombie_death_callback);
     register_player_damage_callback(::gauntlet_player_damage_callback);
+    onplayerconnect_callback(::b2_player_state);
     onplayerconnect_callback(::welcome_prints);
     onplayerconnect_callback(::player_gauntlet_hud);
     add_custom_zombie_spawn_logic(::gauntlet_zombie_spawn_logic);
@@ -303,10 +305,6 @@ setup_game()
     level.gauntlet_dig_spots_respawn_override = undefined;
     /* Whether on that round, it skips checking progress on dead players */
     level._gauntlet_skip_progress_eval_for_dead_players = false;
-    /* Round 6 side ee state */
-    level.gauntlet_side_ee_monkey = false;
-    /* Round 13 side ee state */
-    level.gauntlet_side_ee_zonekill_state = 0;
     /* Round 15 gen recapture last state */
     level.gauntlet_last_gen_recapture = undefined;
 
@@ -493,6 +491,8 @@ gauntlet_main_loop()
         }
 
         GAUNTLET_WAITTILL_END_ROUND;
+        DEBUG(sstr(level.b2_gauntlet_state));
+        DEBUG(sstr(level.b2_gauntlet_player_state));
     }
 }
 
@@ -1086,7 +1086,7 @@ unfreeze_round_zombie_count()
     }
 }
 
-gauntlet_clock(seconds, signal, set_flag = false)
+gauntlet_clock(seconds, signal, set_flag = false, set_b2_flag = undefined)
 {
     TRACE(sstr(self) + " gauntlet_clock " + sstr(seconds) + " " + sstr(signal) + " " + sstr(set_flag));
     level notify("gauntlet_clock+" + signal);
@@ -1096,6 +1096,10 @@ gauntlet_clock(seconds, signal, set_flag = false)
     if (is_true(set_flag))
     {
         flag_set(signal);
+    }
+    if (isdefined(set_b2_flag))
+    {
+        b2_flag_set(set_b2_flag);
     }
     self notify(signal);
 }
@@ -1114,6 +1118,52 @@ unset_no_points_and_powerups()
     self.deathpoints_already_given = undefined;
     self.no_damage_points = undefined;
     self.no_powerups = false;
+}
+
+b2_player_state()
+{
+    TRACE("b2_player_state");
+    if (!isdefined(level.b2_gauntlet_player_state))
+    {
+        level.b2_gauntlet_player_state = [];
+    }
+    level.b2_gauntlet_player_state[STR(self.entity_num)] = 0;
+}
+
+b2_flag(flag, player)
+{
+    TRACE("b2_flag " + sstr(flag) + " " + sstr(player));
+    if (isdefined(player) && isplayer(player))
+    {
+        return (level.b2_gauntlet_player_state[STR(player.entity_num)] & int(flag));
+    }
+    return (level.b2_gauntlet_state & int(flag));
+}
+
+b2_flag_set(flag, player)
+{
+    TRACE("b2_flag_set " + sstr(flag) + " " + sstr(player));
+    if (typeof(player) == "entity" && isplayer(player))
+    {
+        level.b2_gauntlet_player_state[STR(player.entity_num)] |= int(flag);
+    }
+    else
+    {
+        level.b2_gauntlet_state |= int(flag);
+    }
+}
+
+b2_flag_clear(flag, player)
+{
+    TRACE("b2_flag_clear " + sstr(flag) + " " + sstr(player));
+    if (isdefined(player) && isplayer(player))
+    {
+        level.b2_gauntlet_player_state[STR(player.entity_num)] = level.b2_gauntlet_player_state[STR(player.entity_num)] & ~int(flag);
+    }
+    else
+    {
+        level.b2_gauntlet_state = level.b2_gauntlet_state & ~int(flag);
+    }
 }
 
 yes()
@@ -1205,6 +1255,7 @@ mauser_reward_church()
         return;
     }
     flag_set("gauntlet_ee_r18");
+    b2_flag_set(FLAG_DMG_CHALLENGE);
     level._game_module_player_damage_callback = ::_no_damage_player_callback;
     level waittill("end_of_round");
     level._game_module_player_damage_callback = undefined;
@@ -1213,7 +1264,7 @@ mauser_reward_church()
         level waittill("start_of_round");
     }
 
-    if (is_true(level._gauntlet_player_damaged_during_timespeed))
+    if (!b2_flag(FLAG_DMG_CHALLENGE))
     {
         playsoundonplayers("evt_player_downgrade");
         return;
@@ -1253,21 +1304,21 @@ giveaway_zombie_blood()
     players = get_players();
     level._powerup_timeout_custom_time = ::powerup_round_duration;
     min = min_int(players.size, 4);
-    if (is_true(level.gauntlet_side_ee_monkey))
+    if (b2_flag(FLAG_MONK_CHALLENGE))
     {
         for (i = 0; i < min; i++)
         {
             specific_powerup_drop("zombie_blood", church[i]);
         }
     }
-    if (is_true(level.gauntlet_side_ee_zonekill_state))
+    if (b2_flag(FLAG_ZONE_CHALLENGE))
     {
         for (i = 0; i < min; i++)
         {
             specific_powerup_drop("zombie_blood", trenches[i]);
         }
     }
-    if (!is_true(level._gauntlet_player_damaged_during_timespeed))
+    if (b2_flag(FLAG_DMG_CHALLENGE))
     {
         for (i = 0; i < min; i++)
         {
@@ -1289,14 +1340,15 @@ _no_damage_player_callback(einflictor, eattacker, idamage, idflags, smeansofdeat
     TRACE(sstr(self) + " _no_damage_player_callback " + sstr(einflictor) + " " + sstr(eattacker) + " " + sstr(idamage) + " " + sstr(idflags) + " " + sstr(smeansofdeath) + " " + sstr(sweapon) + " " + sstr(vpoint) + " " + sstr(vdir) + " " + sstr(shitloc) + " " + sstr(psoffsettime));
     if (is_player_valid(self, false, true) && is_true(eattacker.is_zombie))
     {
-        level._gauntlet_player_damaged_during_timespeed = true;
+        b2_flag_clear(FLAG_DMG_CHALLENGE);
+        b2_flag_set(P_FLAG_DMG_CHALLENGE_FAIL, self);
     }
 }
 
 mauser_reward(origin, angles)
 {
     TRACE("mauser_reward " + sstr(origin) + " " + sstr(angles));
-    weapon = is_true(level.gauntlet_side_ee_zonekill_state) ? "c96_upgraded_zm" : "c96_zm";
+    weapon = b2_flag(FLAG_ZONE_CHALLENGE) ? "c96_upgraded_zm" : "c96_zm";
     options = level.players[0] maps\mp\zombies\_zm_weapons::get_pack_a_punch_weapon_options(weapon);
     model = spawn_weapon_model(weapon, undefined, origin, angles, options);
     playfxontag(level._effect["special_glow"], model, "tag_origin");
@@ -1304,7 +1356,7 @@ mauser_reward(origin, angles)
     trig.require_look_at = 1;
     trig.hint_string = &"PLATFORM_PICKUPNEWWEAPON";
 
-    for (b_retrieved = 0; !b_retrieved; b_retrieved = swap_mauser(player, is_true(level.gauntlet_side_ee_zonekill_state)))
+    for (b_retrieved = 0; !b_retrieved; b_retrieved = swap_mauser(player, b2_flag(FLAG_ZONE_CHALLENGE)))
     {
         trig waittill("trigger", player);
     }
@@ -2021,7 +2073,7 @@ unguard_crazy_place()
     level endon("end_game");
     level waittill("end_of_round");
 
-    if (is_true(level.gauntlet_side_ee_monkey))
+    if (b2_flag(FLAG_MONK_CHALLENGE))
     {
         for (i = 1; i < 5; i++)
         {
@@ -2030,6 +2082,7 @@ unguard_crazy_place()
     }
     else
     {
+        // fixme
         snapshot_restore_stargate(level.gauntlet_round_snapshot["stargate"]);
     }
 }
@@ -2274,23 +2327,32 @@ headshot_bonus()
             timems = 74000;
     }
 
-    thread gauntlet_clock(timems / 1000, "gauntlet_hs_bonus_expired", true);
+    thread gauntlet_clock(timems / 1000, "gauntlet_hs_bonus_expired", false, FLAG_HS_CHALLENGE_EXPIRED);
 
     level waittill_any("end_of_round", "gauntlet_hs_bonus_expired");
+    level notify("gauntlet_clock+gauntlet_hs_bonus_expired");
     wait 0.75;
 
+    no_failure = true;
     foreach (player in players)
     {
-        if (flag("gauntlet_hs_bonus_expired") && !is_false(player._gauntlet_headshots_only))
+        if (b2_flag(FLAG_HS_CHALLENGE_EXPIRED) && !is_false(player._gauntlet_headshots_only))
         {
             player playsoundtoplayer("evt_player_downgrade", player);
+            no_failure = false;
         }
-        if (!flag("gauntlet_hs_bonus_expired") && !is_false(player._gauntlet_headshots_only))
+        if (!b2_flag(FLAG_HS_CHALLENGE_EXPIRED) && !is_false(player._gauntlet_headshots_only))
         {
             wait 0.25;
+            b2_flag_set(FLAG_HS_CHALLENGE);
+            b2_flag_set(P_FLAG_HS_CHALLENGE, player);
             player add_to_player_score(level.gauntlet_r3_ee_reward);
             player playsoundtoplayer("evt_player_upgrade", player);
         }
+    }
+    if (no_failure)
+    {
+        b2_flag_set(FLAG_HS_CHALLENGE_FULL);
     }
 
     level.gauntlet_zombie_damage_callback_logic = undefined;
@@ -2321,7 +2383,7 @@ monkey_bonus()
     level.gauntlet_zombie_death_callback_logic = ::_on_monkey_kill;
     level waittill("end_of_round");
     level.gauntlet_zombie_death_callback_logic = undefined;
-    if (!is_true(level.gauntlet_side_ee_monkey))
+    if (!b2_flag(FLAG_MONK_CHALLENGE))
     {
         playsoundonplayers("evt_player_downgrade");
     }
@@ -2337,7 +2399,8 @@ _on_monkey_kill()
     if (self get_last_damageweapon() == "cymbal_monkey_zm")
     {
         level.gauntlet_zombie_death_callback_logic = undefined;
-        level.gauntlet_side_ee_monkey = true;
+        b2_flag_set(FLAG_MONK_CHALLENGE);
+        b2_flag_set(P_FLAG_MONK_ATTACKER, self.attacker);
         thread _refund_next_purchase();
         playsoundonplayers("evt_player_upgrade");
     }
@@ -2375,7 +2438,7 @@ zone_killing()
     level.gauntlet_zombie_death_callback_logic = undefined;
     level.gauntlet_zone_hud_processing = undefined;
     set_zone_hud_property(GAUNTLET_HUD_SET_COLOR, (0.85, 0.85, 0.85));
-    if (!is_true(level.gauntlet_side_ee_zonekill_state))
+    if (!b2_flag(FLAG_ZONE_CHALLENGE))
     {
         playsoundonplayers("evt_player_downgrade");
     }
@@ -2394,7 +2457,7 @@ _zone_killing()
         if (progress >= 100)
         {
             thread upgrade_wallbuys();
-            level.gauntlet_side_ee_zonekill_state = true;
+            b2_flag_set(FLAG_ZONE_CHALLENGE);
             playsoundonplayers("evt_player_upgrade");
             level.gauntlet_zone_hud_processing = undefined;
             set_zone_hud_property(GAUNTLET_HUD_SET_COLOR, (0.85, 0.85, 0.85));
@@ -2432,7 +2495,7 @@ hint_zone_killing_progress()
         }
     }
 
-    if (is_true(level.gauntlet_side_ee_zonekill_state))
+    if (b2_flag(FLAG_ZONE_CHALLENGE))
     {
         return;
     }
@@ -4960,7 +5023,7 @@ _gungame_player_thread()
         if (is_player_valid(self))
         {
             weapon = _roll_gungame_weapon(weapon);
-            pap_rng = is_true(level.gauntlet_side_ee_zonekill_state) ? 5 : 8;
+            pap_rng = b2_flag(FLAG_ZONE_CHALLENGE) ? 5 : 8;
             if (get_is_in_box(weapon) && !randomint(pap_rng))
             {
                 weapon = get_upgrade_weapon(weapon);
@@ -5881,6 +5944,21 @@ custom_win_screen()
     win_hud2 settext("TIME: " + convert_time(gettime() - level.gauntlet_game_start, TIME_MMSSVV)); 
     win_hud2 fadeovertime(1);
     win_hud2.alpha = 1;
+
+    features = STR(level.b2_gauntlet_state);
+    foreach (player in level.players)
+    {
+        features += isdefined(level.b2_gauntlet_player_state[STR(player.entity_num)])
+            ? " " + level.b2_gauntlet_player_state[STR(player.entity_num)]
+            : " 0";
+    }
+    win_hud3 = createserverfontstring("default" , 1.8);
+    win_hud3 setpoint("CENTER", "CENTER", 0, 0);
+    win_hud3.alpha = 0;
+    win_hud3.color = (0.75, 0.75, 0.75);
+    win_hud3 settext(features); 
+    win_hud3 fadeovertime(1);
+    win_hud3.alpha = 1;
 }
 
 custom_lose_screen()

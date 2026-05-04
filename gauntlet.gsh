@@ -118,3 +118,18 @@
 
 #define DROP_BOTTOM (0, -361, -618)
 #define DROP_UPPER (5, -392, -488)
+
+// Level state flags
+#define FLAG_TEST 1
+#define FLAG_HS_CHALLENGE 2
+#define FLAG_HS_CHALLENGE_EXPIRED 4
+#define FLAG_HS_CHALLENGE_FULL 8
+#define FLAG_MONK_CHALLENGE 16
+#define FLAG_ZONE_CHALLENGE 32
+#define FLAG_DMG_CHALLENGE 64
+
+// Player state flags
+#define P_FLAG_TEST 1
+#define P_FLAG_HS_CHALLENGE 2
+#define P_FLAG_MONK_ATTACKER 4
+#define P_FLAG_DMG_CHALLENGE_FAIL 8
