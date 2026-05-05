@@ -32,7 +32,7 @@
 #define STR(__val) "" + __val
 #define JSON_ENCODE_MAX_DEPTH 3
 
-#define GAUNTLET_VERSION "0.21"
+#define GAUNTLET_VERSION "0.22"
 #define PLUTO_MINIMAL_VERSION 5278
 #define GAUNTLET_ROUNDS 30
 #define MAX_STRING_LEN 8191
