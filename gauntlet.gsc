@@ -409,6 +409,7 @@ gauntlet_main_loop()
                 if (players.size > 3)
                     _r12_staff_count = 3;
                 register_on_gauntlet_start_of_this_round(::dig_more_zombies);
+                register_on_gauntlet_end_of_this_round(::check_staff_progress);
                 thread wrap_gauntlet_round(::watch_for_staff_upgrade, _r12_staff_count);
                 break;
             case 13:
@@ -1686,6 +1687,27 @@ help_players_with_golden_shovel()
     foreach (player in players)
     {
         player.dig_vars["n_spots_dug"] -= 30;
+    }
+}
+
+check_staff_progress()
+{
+    TRACE("check_staff_progress");
+    if (getclientfield("quest_state" + 1) == 3)
+    {
+        b2_flag_set(FLAG_STAFF_FIRE);
+    }
+    if (getclientfield("quest_state" + 2) == 3)
+    {
+        b2_flag_set(FLAG_STAFF_AIR);
+    }
+    if (getclientfield("quest_state" + 3) == 3)
+    {
+        b2_flag_set(FLAG_STAFF_LIGHTNING);
+    }
+    if (getclientfield("quest_state" + 4) == 3)
+    {
+        b2_flag_set(FLAG_STAFF_WATER);
     }
 }
 

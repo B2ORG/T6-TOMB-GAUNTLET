@@ -128,6 +128,10 @@
 #define FLAG_ZONE_CHALLENGE 32
 #define FLAG_DMG_CHALLENGE 64
 #define FLAG_R2L 128
+#define FLAG_STAFF_FIRE 256
+#define FLAG_STAFF_AIR 512
+#define FLAG_STAFF_LIGHTNING 1024
+#define FLAG_STAFF_WATER 2048
 
 // Player state flags
 #define P_FLAG_TEST 1
