@@ -127,9 +127,11 @@
 #define FLAG_MONK_CHALLENGE 16
 #define FLAG_ZONE_CHALLENGE 32
 #define FLAG_DMG_CHALLENGE 64
+#define FLAG_R2L 128
 
 // Player state flags
 #define P_FLAG_TEST 1
 #define P_FLAG_HS_CHALLENGE 2
 #define P_FLAG_MONK_ATTACKER 4
 #define P_FLAG_DMG_CHALLENGE_FAIL 8
+#define P_FLAG_SHOW_R2L 16

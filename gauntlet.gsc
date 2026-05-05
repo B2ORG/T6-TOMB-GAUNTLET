@@ -138,6 +138,13 @@ main()
         DEBUG("replacefunc dig_spots_respawn");
         replacefunc(fn, ::gauntlet_dig_spots_respawn);
     }
+
+    fn = getfunction("maps/mp/zombies/_zm", "player_out_of_playable_area_monitor");
+    if (isdefined(fn))
+    {
+        DEBUG("replacefunc player_out_of_playable_area_monitor");
+        replacefunc(fn, ::gauntlet_player_out_of_playable_area_monitor);
+    }
 }
 
 init()
@@ -261,6 +268,7 @@ setup_game()
     register_on_gauntlet_init_ready(::change_starting_box_location);
     register_on_gauntlet_init_ready(::gauntlet_electric_cherry_threads);
     register_on_gauntlet_init_ready(::gauntlet_mechz_damage_override);
+    register_on_gauntlet_init_ready(::gauntlet_r2l_watcher);
 
     /* Gauntlet own hook to call before each round */
     register_on_gauntlet_start_of_round(::reset_status);
@@ -3195,6 +3203,84 @@ chat_listener()
     }
 }
 
+gauntlet_r2l_watcher()
+{
+    TRACE("gauntlet_r2l_watcher");
+    level endon("end_game");
+    level endon("gauntlet_end_r2l_watcher");
+    thread _gauntlet_end_r2l_watcher();
+    players = get_players();
+    wait_time = get_player_out_of_playable_area_monitor_wait_time() * 1000;
+
+    while (true)
+    {
+        time = gettime();
+        foreach (player in players)
+        {
+            if (!isdefined(player._gauntlet_last_deathbarrier_tick))
+            {
+                continue;
+            }
+
+            if (player get_current_zone() == "zone_bunker_6" && !b2_flag(P_FLAG_SHOW_R2L, player))
+            {
+                DEBUG("creating r2l bar for " + sstr(player.name));
+                player._gauntlet_r2l_hud = player createbar(COLOR_WHITE, 24, 2);
+                player._gauntlet_r2l_hud setpoint("center", "center", 0, 12);
+                b2_flag_set(P_FLAG_SHOW_R2L, player);
+            }
+            else if (player get_current_zone() != "zone_bunker_6" && b2_flag(P_FLAG_SHOW_R2L, player))
+            {
+                DEBUG("destroying r2l bar for " + sstr(player.name));
+                player._gauntlet_r2l_hud destroyelem();
+                b2_flag_clear(P_FLAG_SHOW_R2L, player);
+            }
+
+            if (b2_flag(P_FLAG_SHOW_R2L, player))
+            {
+                DEBUG("\t(" + gettime() + " - " + sstr(player._gauntlet_last_deathbarrier_tick) + ") / " + sstr(wait_time) + " = " + sstr(diff));
+                diff = (gettime() - player._gauntlet_last_deathbarrier_tick) / wait_time;
+                if (isdefined(player._gauntlet_r2l_hud))
+                {
+                    player._gauntlet_r2l_hud updatebar(diff);
+                }
+                else
+                {
+                    ERROR("undefined r2l hud for " + sstr(player.name));
+                }
+            }
+        }
+
+        if (isdefined(level.num_staffpieces_picked_up) && isdefined(level.num_staffpieces_picked_up["elemental_staff_lightning"]) && level.num_staffpieces_picked_up["elemental_staff_lightning"] > 0)
+        {
+            b2_flag_set(FLAG_R2L);
+            b2_flag_clear(P_FLAG_SHOW_R2L, player);
+            if (isdefined(player._gauntlet_r2l_hud))
+            {
+                player._gauntlet_r2l_hud destroyelem();
+                player._gauntlet_r2l_hud = undefined;
+            }
+            break;
+        }
+
+        wait 0.05;
+    }
+}
+
+_gauntlet_end_r2l_watcher()
+{
+    TRACE("_gauntlet_end_r2l_watcher");
+    level endon("end_game");
+    flag_wait("activate_zone_nml");
+    level notify("gauntlet_end_r2l_watcher");
+    foreach (player in level.players)
+    {
+        b2_flag_clear(P_FLAG_SHOW_R2L, player);
+        player._gauntlet_r2l_hud.alpha = 0;
+        player._gauntlet_r2l_hud destroyelem();
+    }
+}
+
 remove_all_perks()
 {
     TRACE(sstr(self) + " remove_all_perks");
@@ -5726,6 +5812,69 @@ gauntlet_staff_lightning_death_event()
         self do_damage_network_safe(self.attacker, self.health, self.damageweapon, "MOD_RIFLE_BULLET");
     }
 }
+
+gauntlet_player_out_of_playable_area_monitor()
+{
+    self notify("stop_player_out_of_playable_area_monitor");
+    self endon("stop_player_out_of_playable_area_monitor");
+    self endon("disconnect");
+    level endon("end_game");
+
+    while (!isdefined(self.characterindex))
+    {
+        wait 0.05;
+    }
+
+    wait(0.15 * self.characterindex);
+
+    while (true)
+    {
+        self._gauntlet_last_deathbarrier_tick = gettime();
+        if (self.sessionstate == "spectator")
+        {
+            wait get_player_out_of_playable_area_monitor_wait_time() ;
+            continue;
+        }
+
+        if (is_true(level.hostmigration_occured))
+        {
+            wait get_player_out_of_playable_area_monitor_wait_time();
+            continue;
+        }
+
+        if (!self in_life_brush() && (self in_kill_brush() || !self in_enabled_playable_area()))
+        {
+            if (!isdefined(level.player_out_of_playable_area_monitor_callback) || self [[level.player_out_of_playable_area_monitor_callback]]())
+            {
+                if (isdefined(self._gauntlet_r2l_hud))
+                {
+                    self._gauntlet_r2l_hud.color = COLOR_RED;
+                    level notify("gauntlet_end_r2l_watcher");
+                }
+                self maps\mp\zombies\_zm_stats::increment_map_cheat_stat("cheat_out_of_playable");
+                self maps\mp\zombies\_zm_stats::increment_client_stat("cheat_out_of_playable", 0);
+                self maps\mp\zombies\_zm_stats::increment_client_stat("cheat_total", 0);
+                self playlocalsound(level.zmb_laugh_alias);
+                wait 0.5;
+
+                if ( get_players().size == 1 && flag("solo_game") && (isdefined(self.waiting_to_revive) && self.waiting_to_revive))
+                {
+                    level notify("end_game");
+                }
+                else
+                {
+                    self disableinvulnerability();
+                    self.lives = 0;
+                    self dodamage(self.health + 1000, self.origin);
+                    self.bleedout_time = 0;
+                }
+            }
+        }
+
+        wait get_player_out_of_playable_area_monitor_wait_time();
+    }
+}
+
 /*********************************************************************************/
 /*                                   SECTION: HUD                                */
 /*********************************************************************************/
