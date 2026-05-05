@@ -151,7 +151,7 @@ init()
 {
     validate_game();
 #ifdef ENABLE_TRACERS
-    fs_remove("b2gauntlet/trace.log");
+    fs_remove(TRACE_FILE);
 #endif
     thread run_on_gauntlet_notify();
     thread setup_game();
@@ -312,8 +312,6 @@ setup_game()
     level.gauntlet_actor_damage_world_logic_fn = undefined;
     /* Store override for dig respawns */
     level.gauntlet_dig_spots_respawn_override = undefined;
-    /* Whether on that round, it skips checking progress on dead players */
-    level._gauntlet_skip_progress_eval_for_dead_players = false;
     /* Round 15 gen recapture last state */
     level.gauntlet_last_gen_recapture = undefined;
 
@@ -740,7 +738,7 @@ evaluate_player_progress_status()
         if (status != CHALLENGE_STATUS_SUCCESS)
         {
             player = get_player_by_ent_num(player_ent);
-            if (is_true(level._gauntlet_skip_progress_eval_for_dead_players) && isdefined(player) && !isalive(player))
+            if (b2_flag(FLAG_SKIP_DEAD_PLAYERS_FOR_EVAL) && isdefined(player) && !isalive(player))
             {
                 DEBUG("Skipping evaluating progress for player " + sstr(player_ent));
                 continue;
@@ -814,6 +812,7 @@ end_gauntlet(victory)
         level._supress_survived_screen = true;
         level.custom_end_screen = ::custom_win_screen;
         maps\mp\zombies\_zm_game_module::freeze_players(1);
+        level notify("win_gauntlet");
         level notify("end_game");
     }
 
@@ -2760,14 +2759,14 @@ zfill(number, fill_to = 10)
 
 _trace(txt)
 {
-    f = fs_fopen("b2gauntlet/trace.log", "append");
+    f = fs_fopen(TRACE_FILE, "append");
     fs_writeline(f, convert_time(gettime() - getstarttime(), TIME_MSSVV, true) + " - TRACE - " + txt);
     fs_fclose(f);
 }
 
 _dump(object, f)
 {
-    file = "b2gauntlet/dump_" + getutc() + "_" + randomint(10000) + ".json";
+    file = DUMP_FILE(getutc() + "_" + randomint(10000));
     f = isdefined(f) ? f : fs_fopen(file, "append");
     if (!isdefined(f))
     {
@@ -3127,13 +3126,13 @@ wunderfizz_hide_for_a_round()
 get_gauntlet_progress()
 {
     TRACE("get_gauntlet_progress");
-    if (!fs_testfile("b2gauntlet/progress.txt"))
+    if (!fs_testfile(PROGRESS_FILE))
     {
         return 1;
     }
 
     progress = 1;
-    f = fs_fopen("b2gauntlet/progress.txt", "read");
+    f = fs_fopen(PROGRESS_FILE, "read");
     foreach (line in strtok(fs_read(f), "\n"))
     {
         if (issubstr(line, "0: "))
@@ -3158,9 +3157,9 @@ set_gauntlet_progress()
     DEBUG("Updating progress for gauntlet 0 to: " + sstr(level.gauntlet_round));
     lines = array("0: " + level.gauntlet_round);
 
-    if (fs_testfile("b2gauntlet/progress.txt"))
+    if (fs_testfile(PROGRESS_FILE))
     {
-        f = fs_fopen("b2gauntlet/progress.txt", "read");
+        f = fs_fopen(PROGRESS_FILE, "read");
         foreach (line in strtok(fs_read(f), "\n"))
         {
             if (!issubstr(line, "0: "))
@@ -3171,7 +3170,7 @@ set_gauntlet_progress()
         fs_fclose(f);
     }
 
-    f = fs_fopen("b2gauntlet/progress.txt", "write");
+    f = fs_fopen(PROGRESS_FILE, "write");
     foreach (line in lines)
     {
         fs_writeline(f, line);
@@ -3416,13 +3415,13 @@ get_player_by_ent_num(num)
 set_skip_progress_eval_for_dead()
 {
     TRACE("set_skip_progress_eval_for_dead");
-    level._gauntlet_skip_progress_eval_for_dead_players = true;
+    b2_flag_set(FLAG_SKIP_DEAD_PLAYERS_FOR_EVAL);
 }
 
 reset_skip_progress_eval_for_dead()
 {
     TRACE("reset_skip_progress_eval_for_dead");
-    level._gauntlet_skip_progress_eval_for_dead_players = false;
+    b2_flag_clear(FLAG_SKIP_DEAD_PLAYERS_FOR_EVAL);
 }
 
 get_alive_players()

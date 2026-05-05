@@ -1,6 +1,8 @@
 // #define ENABLE_TRACERS
 // #define ENABLE_DEBUG
 
+// #define DEV_SET_EASTEREGGS
+
 /* Inspection can cause ils, use only when needed */
 #define MUTE_INSPECT_DAMAGE
 #define MUTE_INSPECT_DEATH
@@ -34,6 +36,10 @@
 #define PLUTO_MINIMAL_VERSION 5278
 #define GAUNTLET_ROUNDS 30
 #define MAX_STRING_LEN 8191
+
+#define TRACE_FILE "b2gauntlet/trace.log"
+#define PROGRESS_FILE "b2gauntlet/progress.txt"
+#define DUMP_FILE(__id) "b2gauntlet/dump_" + __id + ".json"
 
 #define SIG_INIT_READY "init_ready"
 #define SIG_BEFORE_ROUND "start_of_round"
@@ -132,6 +138,7 @@
 #define FLAG_STAFF_AIR 512
 #define FLAG_STAFF_LIGHTNING 1024
 #define FLAG_STAFF_WATER 2048
+#define FLAG_SKIP_DEAD_PLAYERS_FOR_EVAL 4096
 
 // Player state flags
 #define P_FLAG_TEST 1
