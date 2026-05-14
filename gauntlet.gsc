@@ -3297,8 +3297,11 @@ _gauntlet_end_r2l_watcher()
     foreach (player in level.players)
     {
         b2_flag_clear(P_FLAG_SHOW_R2L, player);
-        player._gauntlet_r2l_hud.alpha = 0;
-        player._gauntlet_r2l_hud destroyelem();
+        if (isdefined(player._gauntlet_r2l_hud))
+        {
+            player._gauntlet_r2l_hud.alpha = 0;
+            player._gauntlet_r2l_hud destroyelem();
+        }
     }
 }
 
