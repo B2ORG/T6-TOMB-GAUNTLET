@@ -37,7 +37,7 @@ Extra details about specific rounds are at the bottom of the document.
 
 # Second chance
 
-Second chance rolls the game back to the beginning of the round upon failing a challenge. On solo, player uses up a QR. On coop, players have independent count of second chances, look forward for in-game message about being awarded one.
+Second chance rolls the game back to the beginning of the round upon failing a challenge. On solo, player uses up a Quick Revive. On coop, the team has independent count of second chances, look forward for in-game message about being awarded one.
 
 # Game rules
 
@@ -202,7 +202,7 @@ Gauntlet has few side challenges, that upon completion grant certain benefits
 
 ## Round 3 - Sniper Challenge
 
-Players must keep 100% headshot accuract through the round. If a zombie is hit in any body part other than the head, the challenge is failed. At the end of the round, each player that has not failed the challenge is rewarded 750 points + 250 points for each player that did not fail the challenge, so if in a 2 player game both players maintain 100% headshot accuracy, they will both get 1250 points, however if only one of them succeeds, he'll only get 1000 points.
+Players must keep 100% headshot accuracy through the round. If a zombie is hit in any body part other than the head, the challenge is failed. At the end of the round, each player that has not failed the challenge is rewarded 750 points + 250 points for each player that did not fail the challenge, so if in a 2 player game both players maintain 100% headshot accuracy, they will both get 1250 points, however if only one of them succeeds, he'll only get 1000 points.
 
 ## Round 6 - Monkey Challenge
 
