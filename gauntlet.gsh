@@ -101,6 +101,7 @@
 #define GENERATOR_ROUNDS array(10, 21, 24, 28)
 
 #define GAUNTLET_WORLD_WEAPONS_ALLOWED_FOR_GUN_RESTRICTION array()
+#define GAUNTLET_STRONG_TOMB_GUNS array("mg08_zm", "hamr_zm", "galil_zm", "mp44_zm", "scar_zm", "ak74u_extclip_zm", "evoskorpion_zm")
 
 #define TELEPORT_WIND_IN "air_teleport_player"
 #define TELEPORT_WIND_OUT "air_teleport_return"

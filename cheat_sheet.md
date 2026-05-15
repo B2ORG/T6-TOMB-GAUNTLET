@@ -190,7 +190,7 @@ The kill requirement is 24 for solo, 72 for 2p, 96 for 3p and 120 for 4p
 
 ## 29. Gun game
 
-Guns are rolled on random interval between 10 and 16 seconds. The weapon has 1 in 8 chances of being upgraded, unless it's a wallbuy, in which case it's 1 in 5.
+Guns are rolled on random interval between 10 and 16 seconds. The weapon has 15% chance of being upgraded, unless it's a wallbuy, in which case it's 25%.
 
 ## 30. Grand finale
 
@@ -210,7 +210,7 @@ At least one zombie must be killed with a monkey bomb. Once completed, the next 
 
 ## Round 13 - Zone Challenge
 
-At least one player has to kill at least one zombie while being in 7 + 1 per player distinct zones. Once the progress level of this challenge is past 50%, the zone hud will be colored if player is in a zone he's already killed a zombie in before. Each player has a separate progress level, but only one has to complete the challenge to get the reward. The reward is automatically upgraded wallbuy guns if purchased while crouched or prone before round 20. Additionally it makes the Mauser reward be upgraded, and increases changes of getting upgraded guns during gungame from 1 in 8 to 1 in 5 and from 1 in 5 to 1 in 3 respectively.
+At least one player has to kill at least one zombie while being in 7 + 1 per player distinct zones. Once the progress level of this challenge is past 50%, the zone hud will be colored if player is in a zone he's already killed a zombie in before. Each player has a separate progress level, but only one has to complete the challenge to get the reward. The reward is automatically upgraded wallbuy guns if purchased while crouched or prone before round 20. Additionally it makes the Mauser reward be upgraded, and increases changes of getting upgraded guns during gungame from 15% to 25% and from 25% to 35% respectively.
 
 ## Round 18 - Mauser Challenge
 

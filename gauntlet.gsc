@@ -5165,20 +5165,52 @@ _gungame_player_thread()
         wait 0.05;
     }
 
+    pap_rng = b2_flag(FLAG_ZONE_CHALLENGE) ? 25 : 15;
     weapon = "";
+    /* Start initial offset differently to prevent all player good guns situation */
+    guns_no_pap = (self.entity_num * -1) + 1;
+    guns_weak = self.entity_num * -1;
+    DEBUG("Start gungame player thread for " + sstr(self.name) + " with pap rng: " + sstr(pap_rng));
     while (true)
     {
         if (is_player_valid(self))
         {
             weapon = _roll_gungame_weapon(weapon);
-            pap_rng = b2_flag(FLAG_ZONE_CHALLENGE) ? 5 : 8;
-            if (get_is_in_box(weapon) && !randomint(pap_rng))
+            if (_gungame_is_weak_gun(weapon))
             {
-                weapon = get_upgrade_weapon(weapon);
+                guns_weak++;
+                if (guns_weak >= 6)
+                {
+                    /* Guaranteed strong weapon */
+                    DEBUG("GUNGAME: Strong wpn reroll");
+                    weapon = _roll_gungame_weapon(weapon, true);
+                    guns_weak = 0;
+                }
             }
-            else if (!get_is_in_box(weapon) && !randomint(pap_rng - 3))
+
+            roll = randomint(100);
+            /* Guaranteed pap weapon */
+            if (guns_no_pap >= 10)
             {
+                DEBUG("GUNGAME: Forced pap");
                 weapon = get_upgrade_weapon(weapon);
+                guns_no_pap = 0;
+            }
+            else if (get_is_in_box(weapon) && roll < pap_rng)
+            {
+                DEBUG("GUNGAME: Roll pap box");
+                weapon = get_upgrade_weapon(weapon);
+                guns_no_pap = 0;
+            }
+            else if (!get_is_in_box(weapon) && roll < pap_rng + 10)
+            {
+                DEBUG("GUNGAME: Roll pap wall");
+                weapon = get_upgrade_weapon(weapon);
+                guns_no_pap = 0;
+            }
+            else
+            {
+                guns_no_pap++;
             }
 
             while (is_true(self.is_drinking))
@@ -5206,15 +5238,19 @@ _gungame_player_thread()
     }
 }
 
-_roll_gungame_weapon(current_weapon)
+_roll_gungame_weapon(current_weapon, no_weak = false)
 {
-    TRACE("_roll_gungame_weapon " + sstr(current_weapon));
-    roll_count = 0;
+    TRACE("_roll_gungame_weapon " + sstr(current_weapon) + " " + sstr(no_weak));
     current_weapon = isdefined(current_weapon) ? current_weapon : "";
-    for (i = 0; i <= 10; i++)
+    for (i = 0; i < 20; i++)
     {
-        wpn = getarraykeys(level.zombie_weapons)[randomint(level.zombie_weapons.size)]; 
-        if (!isdefined(wpn) || get_base_weapon_name(current_weapon, true) == wpn || issubstr(wpn, "staff_") || wpn == "c96_zm" || getsubstr(wpn, 0, 3) == "ray")
+        wpn = is_true(no_weak)
+            ? GAUNTLET_STRONG_TOMB_GUNS[randomint(GAUNTLET_STRONG_TOMB_GUNS.size)]
+            : getarraykeys(level.zombie_weapons)[randomint(level.zombie_weapons.size)];
+        current_base_weapon = get_base_weapon_name(current_weapon, true);
+        current_base_weapon = isdefined(current_base_weapon) ? current_base_weapon : current_weapon;
+
+        if (!isdefined(wpn) || current_base_weapon == wpn || issubstr(wpn, "staff_") || wpn == "c96_zm" || getsubstr(wpn, 0, 3) == "ray")
         {
             continue;
         }
@@ -5226,6 +5262,12 @@ _roll_gungame_weapon(current_weapon)
     }
 
     return "m14_zm";
+}
+
+_gungame_is_weak_gun(gun)
+{
+    TRACE("_gungame_is_weak_gun " + sstr(gun));
+    return !isinarray(GAUNTLET_STRONG_TOMB_GUNS, get_base_weapon_name(gun, true));
 }
 
 /*********************************************************************************/
