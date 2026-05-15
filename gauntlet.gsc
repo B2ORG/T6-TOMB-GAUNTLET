@@ -3287,18 +3287,18 @@ gauntlet_r2l_watcher()
                 continue;
             }
 
-            if (player get_current_zone() == "zone_bunker_6" && !b2_flag(P_FLAG_SHOW_R2L, player))
+            if ((!is_player_valid(player) || player get_current_zone() != "zone_bunker_6") && b2_flag(P_FLAG_SHOW_R2L, player))
+            {
+                DEBUG("destroying r2l bar for " + sstr(player.name));
+                player._gauntlet_r2l_hud destroyelem();
+                b2_flag_clear(P_FLAG_SHOW_R2L, player);
+            }
+            else if (player get_current_zone() == "zone_bunker_6" && !b2_flag(P_FLAG_SHOW_R2L, player))
             {
                 DEBUG("creating r2l bar for " + sstr(player.name));
                 player._gauntlet_r2l_hud = player createbar(COLOR_WHITE, 24, 2);
                 player._gauntlet_r2l_hud setpoint("center", "center", 0, 12);
                 b2_flag_set(P_FLAG_SHOW_R2L, player);
-            }
-            else if (player get_current_zone() != "zone_bunker_6" && b2_flag(P_FLAG_SHOW_R2L, player))
-            {
-                DEBUG("destroying r2l bar for " + sstr(player.name));
-                player._gauntlet_r2l_hud destroyelem();
-                b2_flag_clear(P_FLAG_SHOW_R2L, player);
             }
 
             if (b2_flag(P_FLAG_SHOW_R2L, player))
