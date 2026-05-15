@@ -485,9 +485,9 @@ gauntlet_main_loop()
                 thread wrap_gauntlet_round(::watch_tank_kills, _r28_tank_kills);
                 break;
             case 29:
-                register_on_gauntlet_start_of_this_round(::terminate_drone);
                 register_on_gauntlet_start_of_this_round(::terminate_staffs);
                 register_on_gauntlet_start_of_this_round(::disable_buildables_pickup_for_a_round);
+                register_on_gauntlet_start_of_this_round(::terminate_drone);
                 thread wrap_gauntlet_round(::gungame);
                 break;
             case 30:
