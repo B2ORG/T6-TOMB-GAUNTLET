@@ -926,8 +926,14 @@ snapshot_restore_guns(weapon_snap)
 
     foreach (weapondata in weapon_snap)
     {
+        if (self _snapshot_restore_gun_special(weapondata))
+        {
+            DEBUG("Restore special: " + sstr(weapondata["name"]));
+            continue;
+        }
         if (isweaponprimary(weapondata["name"]))
         {
+            DEBUG("Restore primary: " + sstr(weapondata["name"]));
             if (primaries > get_player_weapon_limit(self))
             {
                 continue;
@@ -937,8 +943,9 @@ snapshot_restore_guns(weapon_snap)
         self weapondata_give(weapondata);
         DEBUG("Restoring weapon to " + sstr(self.name) + " " + sstr(weapondata));
 
-        if (primaries == 1)
+        if (isweaponprimary(weapondata["name"]) && primaries == 1)
         {
+            DEBUG("Restore switchto: " + sstr(weapondata["name"]));
             self switchtoweapon(weapondata["name"]);
         }
     }
@@ -974,6 +981,27 @@ snapshot_restore_stargate(stargates)
             maps\mp\zm_tomb_teleporter::stargate_teleport_enable(idx);
         }
     }
+}
+
+_snapshot_restore_gun_special(weapondata)
+{
+    TRACE(sstr(self) + " _snapshot_restore_gun_special " + sstr(weapondata));
+    switch (weapondata["name"])
+    {
+        case "equip_dieseldrone_zm":
+            foreach (craftable_unitrigger in level.a_uts_craftables)
+            {
+                // DEBUG("unitrigger=" + sstr(craftable_unitrigger) + " fields= " + sstr(craftable_unitrigger getfieldkeys()));
+                if (craftable_unitrigger.equipname != "equip_dieseldrone_zm")
+                {
+                    continue;
+                }
+                craftable_unitrigger setup_quadrotor_purchase(self);
+                break;
+            }
+            return true;
+    }
+    return false;
 }
 
 terminate_active_powerups(team)
