@@ -3213,6 +3213,22 @@ chat_listener()
             cmdexec("map_restart");
 #endif
         }
+        else if (getsubstr(message, 0, 7) == "success")
+        {
+#ifdef ENABLE_DEBUG
+            level notify("terminate_on_status_fail");
+            set_status(CHALLENGE_STATUS_SUCCESS);
+            level.zombie_total = 0;
+            foreach (zombie in get_round_enemy_array())
+            {
+                if (isdefined(zombie) && isalive(zombie))
+                {
+                    zombie dodamage(zombie.maxhealth + 666, player.origin);
+                }
+            }
+            level notify("end_of_round");
+#endif
+        }
         else if (message == "hudcenter")
         {
             player set_status_hud_property(GAUNTLET_HUD_SET_POINT, array("CENTER", "TOPRCENTERIGHT", 0, 24));
