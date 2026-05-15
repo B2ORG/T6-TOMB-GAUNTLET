@@ -1,3 +1,10 @@
+# Beta 0.23
+
+- Feat: Improve Gungame PaP and weapon RNG
+- Feat: Handle drinking state at the beginning of perk removal round
+- Fix: R2L helper remaining visible after respawning
+- Fix: Drone auto-activating after Gungame (hopefully)
+
 # Beta 0.22
 
 - Feat: Add game state flags output at the win game screen
