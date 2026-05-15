@@ -3355,6 +3355,11 @@ remove_all_perks()
     level endon("end_game");
     self endon("disconnect");
 
+    while (is_true(self.is_drinking))
+    {
+        wait 0.05;
+    }
+
     foreach (active_perk in self get_perk_array())
     {
         self notify(active_perk + "_stop");
