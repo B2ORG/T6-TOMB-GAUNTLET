@@ -880,7 +880,7 @@ snapshot_restore(remove_quickrevive, go_back_a_round)
         self._gauntlet_killed_with_shield = undefined;
     }
 
-    level.round_hud set_text_safe("0:00");
+    level.round_hud settext("0:00");
     terminate_drone();
     zombie_goto_round(level.round_number);
 
@@ -6061,12 +6061,6 @@ setup_gauntlet_round_hud()
     }
 }
 
-set_text_safe(text)
-{
-    TRACE("set_text_safe " + sstr(text));
-    self settext(text);
-}
-
 welcome_prints()
 {
     TRACE(sstr(self) + " welcome_prints");
@@ -6107,7 +6101,7 @@ gauntlet_hud()
     level.round_hud setpoint("TOPRIGHT", "TOPRIGHT", 0, 15);
     level.round_hud.alpha = 1;
     level.round_hud.color = (0.6, 0.75, 1);
-    level.round_hud set_text_safe("0:00");
+    level.round_hud settext("0:00");
 
     counter_hud = createserverfontstring("default" , 1.4);
     counter_hud setpoint("CENTER", "CENTER", 0, 185);
@@ -6342,7 +6336,7 @@ set_title_hud_property(instruction, data)
             level.gauntlet_challenge_title setvalue(data);
             break;
         case GAUNTLET_HUD_SET_TEXT:
-            level.gauntlet_challenge_title set_text_safe(data);
+            level.gauntlet_challenge_title settext(data);
             break;
         case GAUNTLET_HUD_SET_COLOR:
             level.gauntlet_challenge_title.color = data;
@@ -6382,6 +6376,7 @@ set_status_hud_property(instruction, data)
                 break;
             case GAUNTLET_HUD_SET_TEXT:
                 player.gauntlet_challenge_player_status set_text_safe(data);
+                    player.gauntlet_challenge_player_status settext(data);
                 break;
             case GAUNTLET_HUD_SET_COLOR:
                 player.gauntlet_challenge_player_status.color = data;
@@ -6421,7 +6416,7 @@ set_zone_hud_property(instruction, data)
                 player.gauntlet_zone_hud setvalue(data);
                 break;
             case GAUNTLET_HUD_SET_TEXT:
-                player.gauntlet_zone_hud set_text_safe(data);
+                player.gauntlet_zone_hud settext(data);
                 break;
             case GAUNTLET_HUD_SET_COLOR:
                 player.gauntlet_zone_hud.color = data;
@@ -6446,7 +6441,7 @@ stop_round_timer_hud()
     TRACE("stop_round_timer_hud");
     timer_text = convert_time(gettime() - level.gauntlet_game_start, TIME_MSSVV);
     split_text = convert_time(gettime() - level.round_start_time, TIME_MSSVV);
-    level.round_hud set_text_safe(strtok(split_text, ".")[0]);
+    level.round_hud settext(strtok(split_text, ".")[0]);
     // say("Game: " + timer_text + " | Round: " + split_text);
 }
 
