@@ -698,6 +698,45 @@ hide_timer_status(delay = 0)
     }
 }
 
+borrow_timer_status_with_txt(text)
+{
+    TRACE(sstr(self) + " borrow_timer_status_with_txt " + sstr(text));
+    level endon("end_game");
+    if (typeof(self) == "entity" && isplayer(self))
+    {
+        self.gauntlet_timer_player_status setpoint("TOPRIGHT", "TOPRIGHT", 0, 70);
+        self.gauntlet_timer_player_status settext(text);
+        self.gauntlet_timer_player_status fadeOverTime(1);
+        self.gauntlet_timer_player_status.alpha = 1;
+    }
+    else
+    {
+        foreach (player in level.players)
+        {
+            player.gauntlet_timer_player_status setpoint("TOPRIGHT", "TOPRIGHT", 0, 70);
+            player.gauntlet_timer_player_status settext(text);
+            player.gauntlet_timer_player_status fadeOverTime(1);
+            player.gauntlet_timer_player_status.alpha = 1;
+        }
+    }
+    level waittill("end_of_round");
+    if (typeof(self) == "entity" && isplayer(self))
+    {
+        self.gauntlet_timer_player_status fadeOverTime(1);
+        self.gauntlet_timer_player_status.alpha = 0;
+        self.gauntlet_timer_player_status setpoint("TOPRIGHT", "TOPRIGHT", 0, 90);
+    }
+    else
+    {
+        foreach (player in level.players)
+        {
+            player.gauntlet_timer_player_status fadeOverTime(1);
+            player.gauntlet_timer_player_status.alpha = 0;
+            player.gauntlet_timer_player_status setpoint("TOPRIGHT", "TOPRIGHT", 0, 90);
+        }
+    }
+}
+
 terminate_on_status_fail()
 {
     TRACE("terminate_on_status_fail");
@@ -5103,10 +5142,21 @@ watch_tank_kills(kill_goal)
 {
     TRACE("watch_tank_kills " + sstr(kill_goal));
     level.gauntlet_hud_quota = kill_goal;
-    set_status_hud_property(GAUNTLET_HUD_SET_TEXT, goal_string());
+    /* Going around string hud limitation - fucking disgrace */
+    if (level.gauntlet_hud_quota >= 50)
+    {
+        thread borrow_timer_status_with_txt(" / " + level.gauntlet_hud_quota);
+        set_status_hud_property(GAUNTLET_HUD_SET_VALUE, 0);
+        set_status_hud_property(GAUNTLET_HUD_SET_POINT, array("TOPRIGHT", "TOPRIGHT", level.gauntlet_hud_quota >= 100 ? -40 : -35, 70));
+    }
+    else
+    {
+        set_status_hud_property(GAUNTLET_HUD_SET_TEXT, goal_string());
+    }
     level.gauntlet_zombie_death_callback_logic = ::_count_up_on_tank_kill;
     _watch_tank_kills_thread(kill_goal);
     level.gauntlet_zombie_death_callback_logic = undefined;
+    set_status_hud_property(GAUNTLET_HUD_SET_POINT, array("TOPRIGHT", "TOPRIGHT", 0, 70));
 }
 
 _count_up_on_tank_kill()
@@ -5140,13 +5190,28 @@ _watch_tank_kills_thread(count)
         level waittill("gauntlet_tank_kill", attacker);
         kills++;
 
-        if (kills >= count)
+        if (level.gauntlet_hud_quota >= 50)
         {
-            set_status(CHALLENGE_STATUS_SUCCESS, goal_string(kills));
+            set_status_hud_property(GAUNTLET_HUD_SET_VALUE, min_int(kills, level.gauntlet_hud_quota));
+            if (kills >= count)
+            {
+                set_status(CHALLENGE_STATUS_SUCCESS);
+            }
+            else if (kills)
+            {
+                set_status(CHALLENGE_STATUS_IN_PROGRESS);
+            }
         }
-        else if (kills)
+        else
         {
-            set_status(CHALLENGE_STATUS_IN_PROGRESS, goal_string(kills));
+            if (kills >= count)
+            {
+                set_status(CHALLENGE_STATUS_SUCCESS, goal_string(kills));
+            }
+            else if (kills)
+            {
+                set_status(CHALLENGE_STATUS_IN_PROGRESS, goal_string(kills));
+            }
         }
     }
 }
@@ -6375,8 +6440,7 @@ set_status_hud_property(instruction, data)
                 player.gauntlet_challenge_player_status setvalue(data);
                 break;
             case GAUNTLET_HUD_SET_TEXT:
-                player.gauntlet_challenge_player_status set_text_safe(data);
-                    player.gauntlet_challenge_player_status settext(data);
+                player.gauntlet_challenge_player_status settext(data);
                 break;
             case GAUNTLET_HUD_SET_COLOR:
                 player.gauntlet_challenge_player_status.color = data;
