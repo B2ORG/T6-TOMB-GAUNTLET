@@ -3341,7 +3341,7 @@ gauntlet_r2l_watcher()
                 continue;
             }
 
-            if ((!is_player_valid(player) || player get_current_zone() != "zone_bunker_6") && b2_flag(P_FLAG_SHOW_R2L, player))
+            if ((b2_flag(P_FLAG_NOT_PLAYING, player) || player get_current_zone() != "zone_bunker_6") && b2_flag(P_FLAG_SHOW_R2L, player))
             {
                 DEBUG("destroying r2l bar for " + sstr(player.name));
                 player._gauntlet_r2l_hud destroyelem();
@@ -3362,6 +3362,7 @@ gauntlet_r2l_watcher()
                 if (isdefined(player._gauntlet_r2l_hud))
                 {
                     player._gauntlet_r2l_hud updatebar(diff);
+                    player._gauntlet_r2l_hud.color = b2_flag(P_FLAG_BEING_KILLED_BY_DEATHBARRIER, player) ? COLOR_RED : COLOR_BLACK;
                 }
                 else
                 {
@@ -6045,17 +6046,14 @@ gauntlet_player_out_of_playable_area_monitor()
         {
             if (!isdefined(level.player_out_of_playable_area_monitor_callback) || self [[level.player_out_of_playable_area_monitor_callback]]())
             {
-                if (isdefined(self._gauntlet_r2l_hud))
-                {
-                    self._gauntlet_r2l_hud.color = COLOR_RED;
-                    level notify("gauntlet_end_r2l_watcher");
-                }
+                b2_flag_set(P_FLAG_BEING_KILLED_BY_DEATHBARRIER, self);
                 self maps\mp\zombies\_zm_stats::increment_map_cheat_stat("cheat_out_of_playable");
                 self maps\mp\zombies\_zm_stats::increment_client_stat("cheat_out_of_playable", 0);
                 self maps\mp\zombies\_zm_stats::increment_client_stat("cheat_total", 0);
                 self playlocalsound(level.zmb_laugh_alias);
                 wait 0.5;
 
+                b2_flag_clear(P_FLAG_BEING_KILLED_BY_DEATHBARRIER, self);
                 if ( get_players().size == 1 && flag("solo_game") && (isdefined(self.waiting_to_revive) && self.waiting_to_revive))
                 {
                     level notify("end_game");

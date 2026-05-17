@@ -117,6 +117,7 @@
 #define COLOR_YELLOW (1, 1, 0.4)
 #define COLOR_RED (1, 0, 0)
 #define COLOR_WHITE (1, 1, 1)
+#define COLOR_BLACK (0, 0, 0)
 
 #define AREA_TRENCHES 1
 #define AREA_CHURCH 2
@@ -148,3 +149,4 @@
 #define P_FLAG_DMG_CHALLENGE_FAIL 8
 #define P_FLAG_SHOW_R2L 16
 #define P_FLAG_NOT_PLAYING 32
+#define P_FLAG_BEING_KILLED_BY_DEATHBARRIER 64
