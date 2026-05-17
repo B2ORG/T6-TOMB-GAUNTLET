@@ -1,3 +1,11 @@
+# Beta 0.24
+
+- Fix: Prevent string config crash on tank round in coop
+- Fix: Ignoring bled out players on per-player failable challenges
+- Fix: Stop teleports from deadlocking rounds 3 and 10 logic
+- Fix: Fix "Robot's Head" being displayed as a zone while teleporting
+- Fix: R2L helper regression, the bar was not hiding if player bled out
+
 # Beta 0.23
 
 - Feat: Improve Gungame PaP and weapon RNG
