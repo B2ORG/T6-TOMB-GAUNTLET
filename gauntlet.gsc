@@ -4096,11 +4096,14 @@ perk_requirement(required_perks)
         {
             perks_have = 0;
 
-            foreach (required_perk in required_perks)
+            if (isdefined(player.perks_active) && isarray(player.perks_active))
             {
-                if (isinarray(player.perks_active, required_perk))
+                foreach (required_perk in required_perks)
                 {
-                    perks_have++;
+                    if (isinarray(player.perks_active, required_perk))
+                    {
+                        perks_have++;
+                    }
                 }
             }
 
@@ -6940,7 +6943,7 @@ zone_friendly_name(zone)
     }
     else if (level.script == "zm_tomb")
     {
-        if (isDefined(self.teleporting) && self.teleporting)
+        if (isdefined(self.teleporting) && self.teleporting)
             return "";
 
         if (zone == "zone_start")
