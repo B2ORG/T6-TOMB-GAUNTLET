@@ -6248,7 +6248,7 @@ gauntlet_hud()
             if (isalive(player))
             {
                 player.gauntlet_zone_hud.alpha = 0.9;
-                z = zone_friendly_name(player get_current_zone());
+                z = player zone_friendly_name();
                 player.gauntlet_zone_hud settext(z);
             }
             else
@@ -6603,9 +6603,14 @@ velocity_scale(vel, player)
 
 zone_friendly_name(zone)
 {
+    TRACE(sstr(self) + " zone_friendly_name " + sstr(zone));
     if (!isdefined(zone))
     {
-        return "";
+        zone = self get_current_zone();
+        if (!isdefined(zone))
+        {
+            return "";
+        }
     }
 
     name = zone;
