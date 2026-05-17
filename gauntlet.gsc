@@ -4033,7 +4033,7 @@ restrict_movement(block_walking)
 
     foreach (player in players)
     {
-        if (is_true(player.giant_robot_transition) || eq(player get_current_zone(), "zone_robot_head"))
+        if (is_true(player.giant_robot_transition) || (eq(player get_current_zone(), "zone_robot_head") && !is_true(self.teleporting)))
         {
             player thread _restrict_movement_thread(block_walking, true);
         }
