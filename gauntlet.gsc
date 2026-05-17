@@ -256,6 +256,7 @@ setup_game()
     onplayerconnect_callback(::b2_player_state);
     onplayerconnect_callback(::welcome_prints);
     onplayerconnect_callback(::player_gauntlet_hud);
+    onplayerconnect_callback(::subscribe_sessionstate);
     add_custom_zombie_spawn_logic(::gauntlet_zombie_spawn_logic);
 
     /* Gauntlet own hooks for setting up the challenge */
@@ -771,26 +772,32 @@ evaluate_player_progress_status()
 {
     TRACE("evaluate_player_progress_status");
     failures = 0;
+    players = get_players();
 
+    DEBUG("Evaluating progress: " + sstr(level.gauntlet_challenge_progress));
     foreach (player_ent, status in level.gauntlet_challenge_progress)
     {
+        player = undefined;
+        player = get_player_by_ent_num(player_ent);
+        // DEBUG("Evaluating player " + sstr(player) + " valid=" + sstr(is_player_valid(player, false, true)) + " flag=" + sstr(b2_flag(FLAG_SKIP_DEAD_PLAYERS_FOR_EVAL)));
+        if (!isdefined(player))
+        {
+            ERROR("Could not evaluate player ent " + sstr(player_ent) + ": player not found");
+            continue;
+        }
+        if (level.gauntlet_second_chances <= 0 && b2_flag(P_FLAG_NOT_PLAYING, player) && b2_flag(FLAG_SKIP_DEAD_PLAYERS_FOR_EVAL))
+        {
+            DEBUG("Skipping evaluation for " + sstr(player_ent) + ": player dead");
+            continue;
+        }
+
         if (status != CHALLENGE_STATUS_SUCCESS)
         {
-            player = get_player_by_ent_num(player_ent);
-            if (b2_flag(FLAG_SKIP_DEAD_PLAYERS_FOR_EVAL) && isdefined(player) && !isalive(player))
-            {
-                DEBUG("Skipping evaluating progress for player " + sstr(player_ent));
-                continue;
-            }
-            else if (!isdefined(player))
-            {
-                WARN("Could not get player by entity num " + sstr(player_ent));
-            }
             failures++;
         }
     }
 
-    if (failures)
+    if (failures > 0)
     {
         self set_status_hud_property(GAUNTLET_HUD_SET_TEXT, "FAILED");
         self set_status_hud_property(GAUNTLET_HUD_SET_COLOR, COLOR_ORANGE);
@@ -3493,10 +3500,11 @@ reduce_riotshield_hitpoints(modifier)
 get_player_by_ent_num(num)
 {
     TRACE("get_player_by_ent_num " + sstr(num));
-    foreach (player in level.players)
+    foreach (player in get_players())
     {
         if (int(num) == player.entity_num)
         {
+            DEBUG("get_player_by_ent_num " + sstr(num) + " => " + sstr(player));
             return player;
         }
     }
@@ -6149,6 +6157,33 @@ flash_hash()
 {
     TRACE("flash_hash");
     cmdexec("flashscripthashes");
+}
+
+/* This should be redundant, but i had misses using is_player_valid */
+subscribe_sessionstate()
+{
+    TRACE("subscribe_sessionstate");
+    self endon("disconnect");
+    sessionstate = "";
+
+    while (true)
+    {
+        if (isdefined(self.sessionstate) && self.sessionstate != sessionstate)
+        {
+            switch (self.sessionstate)
+            {
+                case "spectator":
+                case "intermission":
+                    b2_flag_set(P_FLAG_NOT_PLAYING, self);
+                    break;
+                default:
+                    b2_flag_clear(P_FLAG_NOT_PLAYING, self);
+            }
+            DEBUG("changed sessionstate for player " + sstr(self) + ": " + sstr(self.sessionstate));
+            sessionstate = self.sessionstate;
+        }
+        wait 0.05;
+    }
 }
 
 gauntlet_hud()
