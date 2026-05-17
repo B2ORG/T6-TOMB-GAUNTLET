@@ -883,8 +883,15 @@ snapshot_restore(remove_quickrevive, go_back_a_round)
 
     players = get_players();
 
+    /* Removes the need for passing reviver to remote_revive */
     level.isresetting_grief = true;
-    array_func(players, ::remote_revive);
+    foreach (idx, player in players)
+    {
+        if (!b2_flag(P_FLAG_NOT_PLAYING, player) && player maps\mp\zombies\_zm_laststand::player_is_in_laststand())
+        {
+            player remote_revive();
+        }
+    }
     level.isresetting_grief = undefined;
 
     wait 0.05;
@@ -956,6 +963,7 @@ snapshot_restore(remove_quickrevive, go_back_a_round)
     thread snapshot_restore_stargate(level.gauntlet_round_snapshot["stargate"]);
 
     maps\mp\zombies\_zm::round_over();
+    level notify("between_round_over");
     thread maps\mp\zombies\_zm::round_think(true);
     thread gauntlet_main_loop();
 }
