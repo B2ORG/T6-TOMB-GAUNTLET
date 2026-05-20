@@ -32,6 +32,28 @@ The challenge is shown to the players at the beginning of each round by sending 
 
 At some point this mod will get it's own leaderboards, for now, i'll put best results here (from version beta 0.2 onwards), as long as they follow the rules
 
+## Solo completions
+
+None with footage yet :(
+
+## 2p completions
+
+| Time | Players | Version | Ft flags |
+| :---: | :--- | :---: | :---: |
+| [58:26.85](https://youtu.be/nynZ0-ZqS3U) | Huth & Tima | 0.24 | 186 10 6 |
+
+## 3p completions
+
+| Time | Players | Version | Ft flags |
+| :---: | :--- | :---: | :---: |
+| [1:22:19.85](https://youtu.be/PgUClzpdgwo) | Huth, Tima & DankSlushie | 0.24 | 186 2 12 10 |
+
+## 4p completions
+
+| Time | Players | Version | Ft flags |
+| :---: | :--- | :---: | :---: |
+| [1:51:33.85](https://youtu.be/itaj26etQXw) | Zi0, Huth, Tima & DankSlushie | 0.24 | 186 6 10 10 10 |
+
 ## Rules
 
 - Standard round speedrun rules apply unless stated otherwise.
