@@ -1,3 +1,7 @@
+# Beta 0.25
+
+- Fix: Add extra protection from drone failing the game on restricted loadout rounds (hopefully)
+
 # Beta 0.24
 
 - Fix: Prevent string config crash on tank round in coop
