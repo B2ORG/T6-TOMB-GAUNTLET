@@ -1312,9 +1312,11 @@ terminate_drone()
 debounce_drone_damage_for_a_round()
 {
     TRACE("debounce_drone_damage");
+    b2_flag_set(FLAG_DRONE_DISABLED);
     level.gauntlet_actor_damage_world_logic = ::debounce_drone_damage;
     level waittill("end_of_round");
     level.gauntlet_actor_damage_world_logic = undefined;
+    b2_flag_clear(FLAG_DRONE_DISABLED);
 }
 
 debounce_drone_damage(inflictor, attacker, damage, flags, meansofdeath, weapon, vpoint, vdir, shitloc, psoffsettime, boneindex)
@@ -4357,6 +4359,13 @@ _restrict_guns_kill_check()
             last_damageweapon = get_last_damageweapon();
     }
     DEBUG("_restrict_guns_kill_check logic " + sstr(last_damageweapon));
+
+    if (b2_flag(FLAG_DRONE_DISABLED) && eq(last_damageweapon, "quadrotorturret_zm"))
+    {
+        DEBUG("Debouncing drone in kill check");
+        return;
+    }
+
     if (!isinarray(level.gauntlet_allowed_guns, last_damageweapon))
     {
         WARN(sstr(self.attacker) + " used illegal weapon: " + sstr(last_damageweapon));
