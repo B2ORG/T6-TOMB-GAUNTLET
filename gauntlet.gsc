@@ -5163,6 +5163,8 @@ absurd_powerups()
 _fail_on_powerup_grab(player)
 {
     TRACE("_fail_on_powerup_grab " + sstr(player));
+    self stoploopsound();
+    self powerup_delete();
     player set_status(CHALLENGE_STATUS_FAIL);
     return false;
 }
