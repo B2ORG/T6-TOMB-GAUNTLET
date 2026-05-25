@@ -2266,7 +2266,7 @@ gauntlet_dig_spots_respawn(a_dig_spots)
 should_show_r2l_bar()
 {
     TRACE(sstr(self) + " should_show_r2l_bar");
-    if (!b2_flag(P_FLAG_NOT_PLAYING, player))
+    if (!b2_flag(P_FLAG_NOT_PLAYING, self))
     {
         switch (self get_current_zone())
         {
