@@ -5332,6 +5332,7 @@ _gungame_player_thread()
             if (_gungame_is_weak_gun(weapon))
             {
                 guns_weak++;
+                guns_weak += _gungame_is_dogshit_gun(weapon);
                 if (guns_weak >= 6)
                 {
                     /* Guaranteed strong weapon */
@@ -5421,6 +5422,12 @@ _gungame_is_weak_gun(gun)
 {
     TRACE("_gungame_is_weak_gun " + sstr(gun));
     return !isinarray(GAUNTLET_STRONG_TOMB_GUNS, get_base_weapon_name(gun, true));
+}
+
+_gungame_is_dogshit_gun(gun)
+{
+    TRACE("_gungame_is_dogshit_gun " + sstr(gun));
+    return isinarray(GAUNTLET_DOGSHIT_TOMB_GUNS, gun) ? 1 : 0;
 }
 
 /*********************************************************************************/

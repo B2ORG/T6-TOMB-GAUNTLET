@@ -103,6 +103,7 @@
 
 #define GAUNTLET_WORLD_WEAPONS_ALLOWED_FOR_GUN_RESTRICTION array()
 #define GAUNTLET_STRONG_TOMB_GUNS array("mg08_zm", "hamr_zm", "galil_zm", "mp44_zm", "scar_zm", "ak74u_extclip_zm", "evoskorpion_zm")
+#define GAUNTLET_DOGSHIT_TOMB_GUNS array("m14_zm", "ballista_zm", "beretta93r_zm", "beretta93r_extclip_zm", "870mcs_zm", "m32_zm")
 
 #define TELEPORT_WIND_IN "air_teleport_player"
 #define TELEPORT_WIND_OUT "air_teleport_return"
