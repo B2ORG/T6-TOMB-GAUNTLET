@@ -2631,6 +2631,8 @@ hint_zone_killing_progress()
         {
             break;
         }
+
+        wait 0.05;
     }
 
     if (b2_flag(FLAG_ZONE_CHALLENGE))
