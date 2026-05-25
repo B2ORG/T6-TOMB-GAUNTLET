@@ -1,3 +1,15 @@
+# Beta 0.26
+
+- Feat: Failing powerup is now cleaned up on round 27 for visual consistency
+- Feat: Timescale & Gspeed always reset
+- Feat: Round 13 side challenge reward now lasts longer
+- Feat: Slightly improved luck on round 29 gungame
+- Fix: Round 13 states - movement penalties and exemptions from them work more consistently
+- Fix: Crash on round 13 related to side challenge
+- Fix: Round 13 side challenge reward not going away
+- Fix: Ability to retrieve double tap from challenge box on round 22
+- Fix: 2 drones spawning instead of 1 (hopefully)
+
 # Beta 0.25
 
 - Fix: Add extra protection from drone failing the game on restricted loadout rounds (hopefully)

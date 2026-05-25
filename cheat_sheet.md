@@ -214,7 +214,7 @@ At least one player has to kill at least one zombie while being in 7 + 1 per pla
 
 ## Round 18 - Mauser Challenge
 
-If no player is damaged during this round, on round 20 there are free Mausers (1 per player) available to be picked up in church.
+If no player is damaged during this round, on round 20 there are free Mausers (1 per player) available to be picked up in church. Additionally, after round 25, a free double tap bottle spawns on generator 6.
 
 ## Round 20 - Zombie Blood challenge
 
