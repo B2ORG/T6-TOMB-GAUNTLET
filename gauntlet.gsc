@@ -2263,6 +2263,22 @@ gauntlet_dig_spots_respawn(a_dig_spots)
     }
 }
 
+should_show_r2l_bar()
+{
+    TRACE(sstr(self) + " should_show_r2l_bar");
+    if (!b2_flag(P_FLAG_NOT_PLAYING, player))
+    {
+        switch (self get_current_zone())
+        {
+            case "zone_bunker_6":
+                return true;
+            case "zone_bunker_tank_b":
+                return !self in_life_brush() && (self in_kill_brush() || !self in_enabled_playable_area());
+        }
+    }
+    return false;
+}
+
 gauntlet_reward_double_tap(player, s_stat)
 {
     TRACE(sstr(self.script_noteworthy) + " gauntlet_reward_double_tap " + sstr(player) + " " + sstr(s_stat));
@@ -3557,13 +3573,13 @@ gauntlet_r2l_watcher()
                 continue;
             }
 
-            if ((b2_flag(P_FLAG_NOT_PLAYING, player) || player get_current_zone() != "zone_bunker_6") && b2_flag(P_FLAG_SHOW_R2L, player))
+            if (!player should_show_r2l_bar() && b2_flag(P_FLAG_SHOW_R2L, player))
             {
                 DEBUG("destroying r2l bar for " + sstr(player.name));
                 player._gauntlet_r2l_hud destroyelem();
                 b2_flag_clear(P_FLAG_SHOW_R2L, player);
             }
-            else if (player get_current_zone() == "zone_bunker_6" && !b2_flag(P_FLAG_SHOW_R2L, player))
+            else if (player should_show_r2l_bar() && !b2_flag(P_FLAG_SHOW_R2L, player))
             {
                 DEBUG("creating r2l bar for " + sstr(player.name));
                 player._gauntlet_r2l_hud = player createbar(COLOR_WHITE, 24, 2);
