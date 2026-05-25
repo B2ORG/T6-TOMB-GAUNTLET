@@ -145,6 +145,13 @@ main()
         DEBUG("replacefunc player_out_of_playable_area_monitor");
         replacefunc(fn, ::gauntlet_player_out_of_playable_area_monitor);
     }
+
+    fn = getfunction("maps/mp/zm_tomb_challenges", "reward_double_tap");
+    if (isdefined(fn))
+    {
+        DEBUG("replacefunc reward_double_tap");
+        replacefunc(fn, ::gauntlet_reward_double_tap);
+    }
 }
 
 init()
@@ -2129,6 +2136,19 @@ gauntlet_dig_spots_respawn(a_dig_spots)
     }
 }
 
+gauntlet_reward_double_tap(player, s_stat)
+{
+    TRACE(sstr(self.script_noteworthy) + " gauntlet_reward_double_tap " + sstr(player) + " " + sstr(s_stat));
+    if (b2_flag(FLAG_PERKS_LOCKED))
+    {
+        play_sound_at_pos("no_purchase", self.origin);
+        return false;
+    }
+    fn = getfunction("maps/mp/zm_tomb_challenges", "reward_double_tap");
+    disabledetouronce(fn);
+    return self [[fn]](player, s_stat);
+}
+
 gauntlet_award_challenges(only_challenges = [])
 {
     TRACE("gauntlet_award_challenges " + sstr(only_challenges));
@@ -3477,16 +3497,22 @@ remove_all_perks()
 {
     TRACE(sstr(self) + " remove_all_perks");
     level endon("end_game");
+    level endon("end_of_round");
     self endon("disconnect");
 
-    while (is_true(self.is_drinking))
+    while (true)
     {
-        wait 0.05;
-    }
+        while (is_true(self.is_drinking))
+        {
+            wait 0.1;
+        }
 
-    foreach (active_perk in self get_perk_array())
-    {
-        self notify(active_perk + "_stop");
+        foreach (active_perk in self get_perk_array())
+        {
+            self notify(active_perk + "_stop");
+            wait 0.1;
+        }
+
         wait 0.1;
     }
 }
@@ -4903,11 +4929,13 @@ remove_and_disable_perks()
     old_custom_perk_validation = level.custom_perk_validation;
     level.custom_perk_validation = ::no;
 
+    b2_flag_set(FLAG_PERKS_LOCKED);
     thread wunderfizz_hide_for_a_round();
     array_thread(level.players, ::remove_all_perks);
 
     level waittill("end_of_round");
     level.custom_perk_validation = old_custom_perk_validation;
+    b2_flag_clear(FLAG_PERKS_LOCKED);
     set_status(CHALLENGE_STATUS_SUCCESS);
 }
 
