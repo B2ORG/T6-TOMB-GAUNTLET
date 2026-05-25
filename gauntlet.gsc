@@ -149,10 +149,10 @@ main()
 
 init()
 {
-    validate_game();
 #ifdef ENABLE_TRACERS
     fs_remove(TRACE_FILE);
 #endif
+    validate_game();
     thread run_on_gauntlet_notify();
     thread setup_game();
 
@@ -619,6 +619,8 @@ set_status(status, new_hud_value, new_hud_color)
 validate_game()
 {
     TRACE("validate_game");
+    reset_vars(true);
+
     if (int(getsubstr(getdvar("shortversion"), 1)) < PLUTO_MINIMAL_VERSION)
     {
         flag_wait("initial_blackscreen_passed");
@@ -934,6 +936,7 @@ snapshot_restore(remove_quickrevive, go_back_a_round)
     }
 
     level.round_hud settext("0:00");
+    reset_vars();
     terminate_drone();
     zombie_goto_round(level.round_number);
 
@@ -1719,14 +1722,23 @@ gauntlet_cherry_reload_attack()
 lower_gspeed_for_a_round()
 {
     TRACE("lower_gspeed_for_a_round");
-    register_on_gauntlet_end_of_this_round(::reset_gspeed);
+    register_on_gauntlet_end_of_this_round(::reset_vars);
     setdvar("g_speed", 170);
 }
 
-reset_gspeed()
+reset_vars(check_cheats = false)
 {
-    TRACE("reset_gspeed");
+    TRACE("reset_vars " + int(check_cheats));
     setdvar("g_speed", 190);
+    setdvar("timescale", 1);
+    if (check_cheats && getdvar("sv_cheats") != "0")
+    {
+#ifndef ENABLE_DEBUG
+        setdvar("sv_cheats", 0);
+        wait 0.05;
+        cmdexec("map_restart");
+#endif
+    }
 }
 
 dig_more_zombies()
@@ -4639,12 +4651,10 @@ break_time_and_space()
     TRACE("break_time_and_space");
     level endon("end_game");
 
+    register_on_gauntlet_end_of_this_round(::reset_vars);
     thread _break_time_and_space_thread();
 
     level waittill("end_of_round");
-    waittillframeend;
-    setdvar("timescale", 1);
-    reset_gspeed();
     set_status(CHALLENGE_STATUS_SUCCESS);
 }
 
