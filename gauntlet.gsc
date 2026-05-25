@@ -4460,13 +4460,13 @@ watch_player_velocity()
 _watch_player_velocity_thread()
 {
     TRACE(sstr(self) + " _watch_player_velocity_thread");
+    assert(isplayer(self), "_watch_player_velocity_thread thread must be on a player");
     level endon("end_game");
     level endon("end_of_round");
     self endon("disconnect");
 
     movement_points = 999;
     not_moving_checks = 0;
-    last_teleport_state = false;
 
 #ifdef ENABLE_DEBUG
     self._gauntlet_dev_hud_movement_points = self createbar(COLOR_WHITE, 24, 2);
@@ -4477,28 +4477,29 @@ _watch_player_velocity_thread()
     {
         wait 0.1;
 
+        if (b2_flag(P_FLAG_NOT_PLAYING, self))
+        {
+#ifdef ENABLE_DEBUG
+            _cleanup_dev_hud();
+#endif
+            break;
+        }
+
         /* Reset the movement points, so it's not as brutal when changing state */
-        if (!is_player_valid(self))
+        while (self player_is_in_laststand() || is_true(self.teleporting))
         {
+            b2_flag_set(P_FLAG_FROZEN_MOVEMENT_POINTS, self);
             movement_points = 999;
             not_moving_checks = 0;
-            continue;
+            wait 0.05;
         }
-
-        if (is_true(self.teleporting))
+        if (b2_flag(P_FLAG_FROZEN_MOVEMENT_POINTS, self))
         {
-            movement_points = 999;
-            not_moving_checks = 0;
-            continue;
+            DEBUG(sstr(self) + ": froze movement points");
+            wait 2;
+            DEBUG(sstr(self) + ": unfroze movement points");
         }
-        else if (!is_true(self.teleporting) && is_true(last_teleport_state))
-        {
-            /* Out of teleport, small intermission */
-            wait 0.5;
-        }
-        last_teleport_state = self.teleporting;
-
-        assert(isplayer(self), "_watch_player_velocity_thread thread must be on a player");
+        b2_flag_clear(P_FLAG_FROZEN_MOVEMENT_POINTS, self);
 
         velocity = int(length(self getvelocity() * (1, 1, self isonground() ? 1 : 0)));
         not_moving_checks = gettime() % 20 == 0 && velocity < 50 ? not_moving_checks + 0.5 : 0;
@@ -4517,30 +4518,37 @@ _watch_player_velocity_thread()
             weapon_to_steal = weapons[randomint(weapons.size)];
             ammo_stock = self getweaponammostock(weapon_to_steal);
 
-            /* Don't deal damage while reviving someone */
-            rng = clamp_int(randomint(3), is_true(self.is_reviving_any), 2);
-            // DEBUG("_watch_player_velocity_thread for " + sstr(self) + ": movement_points=" + sstr(movement_points) + " weapons=" + sstr(weapons) + " weapon_to_steal=" + sstr(weapon_to_steal) + " ammo_stock=" + sstr(ammo_stock) + " score=" + sstr(self.score) + " rng=" + sstr(rng) + " intermission=" + sstr(level.intermission));
-
-            if (rng == 2 && self.score > 50)
+            switch (randomint(3))
             {
-                penalty = roundtonearestfive(max_int(30, self.score / 25));
-                assert(isint(penalty));
-                self minus_to_player_score(penalty);
-                // DEBUG("Movement penalty for " + sstr(self) + " POINTS: " + sstr(penalty));
-            }
-            else if (rng == 1 && ammo_stock)
-            {
-                penalty = max_int(1, weaponclipsize(weapon_to_steal) / 10);
-                assert(isint(penalty));
-                self setweaponammostock(weapon_to_steal, ammo_stock - penalty);
-                // DEBUG("Movement penalty for " + sstr(self) + " AMMO: " + sstr(penalty));
-            }
-            else
-            {
-                penalty = int(self.maxhealth / 25);
-                assert(isint(penalty));
-                self dodamage(penalty, self.origin);
-                // DEBUG("Movement penalty for " + sstr(self) + " HEALTH: " + sstr(penalty));
+                case 2:
+                    if (ammo_stock > 0)
+                    {
+                        penalty = max_int(1, weaponclipsize(weapon_to_steal) / 10);
+                        assert(isint(penalty));
+                        self setweaponammostock(weapon_to_steal, ammo_stock - penalty);
+                        // DEBUG("Movement penalty for " + sstr(self) + " AMMO: " + sstr(penalty));
+                        break;
+                    }
+                case 1:
+                    if (self.score > 50)
+                    {
+                        penalty = roundtonearestfive(max_int(30, self.score / 25));
+                        assert(isint(penalty));
+                        self minus_to_player_score(penalty);
+                        // DEBUG("Movement penalty for " + sstr(self) + " POINTS: " + sstr(penalty));
+                        break;
+                    }
+                case 0:
+                    if (!self is_reviving_any())
+                    {
+                        penalty = int(self.maxhealth / 25);
+                        assert(isint(penalty));
+                        self dodamage(penalty, self.origin);
+                        // DEBUG("Movement penalty for " + sstr(self) + " HEALTH: " + sstr(penalty));
+                        break;
+                    }
+                default:
+                    // DEBUG("Movement penalty for " + sstr(self) + " IGNORED");
             }
         }
     }
