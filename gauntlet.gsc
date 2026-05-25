@@ -2697,6 +2697,7 @@ stop_upgrade_wallbuys()
     if (level.round_number >= 20)
     {
         level notify("gauntlet_stop_upgrade_wallbuys");
+        DEBUG("Killing wallpower ee");
         return;
     }
 
@@ -2708,6 +2709,9 @@ stop_upgrade_wallbuys()
             break;
         }
     }
+
+    level notify("gauntlet_stop_upgrade_wallbuys");
+    DEBUG("Killing wallpower ee");
 }
 
 zone_killing_state_color(hud)
