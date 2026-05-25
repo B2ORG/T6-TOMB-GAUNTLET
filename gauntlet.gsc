@@ -245,10 +245,9 @@ setup_game()
 #ifdef DEV_AWARD_TOMB_CHALLENGES
         register_on_gauntlet_start_of_this_round(::gauntlet_award_challenges);
 #endif
-#ifdef DEV_ACTIVATE_TOMB_GENS
         register_on_gauntlet_start_of_this_round(::_dev_powerup_gens);
-#endif
-        thread _dev_handle_doors();
+        register_on_gauntlet_start_of_this_round(::_dev_build_craftables);
+        register_on_gauntlet_start_of_this_round(::_dev_handle_doors);
     }
 #endif
 
@@ -1310,6 +1309,130 @@ enable_nukes()
     TRACE("enable_nukes");
     level.zombie_powerups["nuke"].func_should_drop_with_regular_powerups = ::yes;
     arrayremovevalue(level.gauntlet_disabled_dig_powerups, "nuke", false);
+}
+
+build_craftable(craftable)
+{
+    TRACE("build_craftable " + sstr(craftable));
+    player = get_players()[0];
+
+    foreach (stub in level.a_uts_craftables)
+    {
+        if (stub.craftablestub.name == craftable)
+        {
+            foreach (piece in stub.craftablespawn.a_piecespawns)
+            {
+                piecespawn = get_craftable_piece(stub.craftablestub.name, piece.piecename);
+
+                if (isdefined(piecespawn))
+                {
+                    player player_take_piece(piecespawn);
+                }
+            }
+
+            return;
+        }
+    }
+}
+
+pick_up_craftable_parts(craftable)
+{
+    TRACE("pick_up_craftable_parts " + sstr(craftable));
+
+    player = get_players()[0];
+
+    foreach (stub in level.zombie_include_craftables)
+    {
+        if (stub.name == craftable)
+        {
+            foreach (piece in stub.a_piecestubs)
+            {
+                piecespawn = piece.piecespawn;
+
+                if (isdefined(piecespawn))
+                {
+                    player player_take_piece(piecespawn);
+                }
+            }
+
+            return;
+        }
+    }
+}
+
+get_craftable_piece(str_craftable, str_piece)
+{
+    TRACE("get_craftable_piece " + sstr(str_craftable) + " " + sstr(str_piece));
+    foreach (uts_craftable in level.a_uts_craftables)
+    {
+        if (uts_craftable.craftablestub.name == str_craftable)
+        {
+            foreach (piecespawn in uts_craftable.craftablespawn.a_piecespawns)
+            {
+                if (piecespawn.piecename == str_piece)
+                {
+                    return piecespawn;
+                }
+            }
+        }
+    }
+
+    return;
+}
+
+player_take_piece(piecespawn)
+{
+    TRACE("player_take_piece " + sstr(piecespawn));
+    piecestub = piecespawn.piecestub;
+    damage = piecespawn.damage;
+
+    if (isdefined(piecestub.onpickup))
+    {
+        piecespawn [[piecestub.onpickup]](self);
+    }
+
+    if (isdefined(piecestub.is_shared) && piecestub.is_shared)
+    {
+        if (isdefined(piecestub.client_field_id))
+        {
+            level setclientfield(piecestub.client_field_id, 1);
+        }
+    }
+    else
+    {
+        if (isdefined(piecestub.client_field_state))
+        {
+            self setclientfieldtoplayer("craftable", piecestub.client_field_state);
+        }
+    }
+
+    piecespawn piece_unspawn();
+    piecespawn notify("pickup");
+
+    if (isdefined(piecestub.is_shared) && piecestub.is_shared)
+    {
+        piecespawn.in_shared_inventory = 1;
+    }
+
+    self adddstat("buildables", piecespawn.craftablename, "pieces_pickedup", 1);
+}
+
+piece_unspawn()
+{
+    TRACE("piece_unspawn");
+    if (isdefined(self.model))
+    {
+        self.model delete();
+    }
+
+    self.model = undefined;
+
+    if (isdefined(self.unitrigger))
+    {
+        thread maps\mp\zombies\_zm_unitrigger::unregister_unitrigger(self.unitrigger);
+    }
+
+    self.unitrigger = undefined;
 }
 
 terminate_drone_for_a_round()
@@ -7265,6 +7388,29 @@ _dev_powerup_gens()
         zone maps\mp\zm_tomb_capture_zones::generator_state_power_up();
         level setclientfield(zone.script_noteworthy, zone.n_current_progress / 100);
         wait_network_frame();
+    }
+#endif
+}
+
+_dev_build_craftables()
+{
+    TRACE("_dev_build_craftables");
+#ifdef DEV_BUILD_CRAFTABLES
+    if (is_true(level.zombiemode_using_afterlife))
+    {
+        flag_wait("afterlife_start_over");
+    }
+
+    if (level.script == "zm_prison")
+    {
+        build_craftable("alcatraz_shield_zm");
+        build_craftable("packasplat");
+    }
+    else if (level.script == "zm_tomb")
+    {
+        build_craftable("tomb_shield_zm");
+        build_craftable("equip_dieseldrone_zm");
+        pick_up_craftable_parts("gramophone");
     }
 #endif
 }

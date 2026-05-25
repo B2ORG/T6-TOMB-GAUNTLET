@@ -77,6 +77,6 @@ People who helped developing this mod, either by contributing code or testing st
 - [Huth](https://github.com/HuthTV)
 - [Tima](https://www.twitch.tv/t1malele)
 
-I used some of the old code from [Reimagined](https://github.com/Jbleezy/BO2-Reimagined) project for zone names
+I used some code from the [Reimagined project](https://github.com/Jbleezy/BO2-Reimagined)
 
 And of course, the [Plutonium team](https://plutonium.pw/) for creating such a good client for modding stuff and helping triage some of the engine related errors i was encountering.
