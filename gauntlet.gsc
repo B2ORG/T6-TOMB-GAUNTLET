@@ -485,6 +485,7 @@ gauntlet_main_loop()
                 thread wrap_gauntlet_round(::restrict_guns, array("c96_zm", "knife_zm", "m14_zm", "ballista_zm", "galil_zm", "mp44_zm", "scar_zm", "frag_grenade_zm"));
                 break;
             case 25:
+                register_on_gauntlet_end_of_this_round(::double_tap_reward_gen6);
                 thread wrap_gauntlet_round(::indoors_only);
                 break;
             case 26:
@@ -1638,6 +1639,65 @@ swap_mauser(player, upgraded = false)
 
         return true;
     }
+    return false;
+}
+
+double_tap_reward_gen6()
+{
+    TRACE("double_tap_reward_gen6");
+    if (!b2_flag(FLAG_DMG_CHALLENGE))
+    {
+        playsoundonplayers("evt_player_downgrade");
+        return;
+    }
+
+    players = get_players();
+    church = array((1078, -3590, 336), (1078, -3830, 336), (838, -3830, 336), (838, -3590, 336));
+    for (i = 0; i < min_int(players.size, 4); i++)
+    {
+        double_tap_reward(church[i], (0, 0, 0));
+    }
+}
+
+double_tap_reward(origin, angles)
+{
+    TRACE("double_tap_reward " + sstr(origin) + " " + sstr(angles));
+    model = spawn_weapon_model("zombie_perk_bottle_doubletap", undefined, origin, angles);
+    playfxontag(level._effect["special_glow"], model, "tag_origin");
+    trig = tomb_spawn_trigger_radius(origin, 40, 1);
+    trig.require_look_at = 1;
+    trig.hint_string = "Pick up Double Tap";
+
+    for (b_retrieved = 0; !b_retrieved; b_retrieved = pick_up_doubletap(player))
+    {
+        trig waittill("trigger", player);
+    }
+
+    trig tomb_unitrigger_delete();
+    model delete();
+}
+
+pick_up_doubletap(player)
+{
+    TRACE("pick_up_doubletap " + sstr(player));
+    str_current_weapon = player getcurrentweapon();
+    if (!b2_flag(P_FLAG_NOT_PLAYING, player)
+        && !player player_is_in_laststand()
+        && !is_true(player.is_drinking)
+        && !is_placeable_mine(str_current_weapon)
+        && !is_equipment(str_current_weapon)
+        && level.revive_tool != str_current_weapon
+        && "none" != str_current_weapon
+        && !player hacker_active()
+        && !player hasperk("specialty_rof")
+        && !player has_perk_paused("specialty_rof")
+        && player get_perk_array().size < player get_player_perk_purchase_limit()
+    )
+    {
+        level thread vending_trigger_post_think(player, "specialty_rof");
+        return true;
+    }
+
     return false;
 }
 
