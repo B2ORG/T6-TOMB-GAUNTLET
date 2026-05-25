@@ -936,6 +936,7 @@ snapshot_restore(remove_quickrevive, go_back_a_round)
         player setclientfield("score_cf_double_points_active", 0);
         player notify("insta_kill_over");
 
+        player equipment_take();
         player takeallweapons();
         foreach (active_perk in player.perks_active)
         {
@@ -5526,7 +5527,9 @@ _gungame_player_thread()
     /* Start initial offset differently to prevent all player good guns situation */
     guns_no_pap = (self.entity_num * -1) + 1;
     guns_weak = self.entity_num * -1;
+
     DEBUG("Start gungame player thread for " + sstr(self.name) + " with pap rng: " + sstr(pap_rng));
+    self equipment_take();
     while (true)
     {
         if (is_player_valid(self))
