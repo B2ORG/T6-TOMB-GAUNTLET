@@ -213,38 +213,10 @@ setup_game()
             }
         }
         level.zombie_move_speed = level.round_number * level.zombie_vars["zombie_move_speed_multiplier"];
-#ifdef DEV_SET_EASTEREGGS
-        if (level.start_round > 6)
-        {
-            b2_flag_set(FLAG_MONK_CHALLENGE);
-            thread _refund_next_purchase();
-        }
-        if (level.start_round > 13)
-        {
-            b2_flag_set(FLAG_ZONE_CHALLENGE);
-            thread upgrade_wallbuys();
-        }
-        if (level.start_round >= 19)
-        {
-            pcount = clamp_int(level.players.size, 1, 4);
-            thread mauser_reward((829, -2487, 355), (0, 330, 0));
-            if (pcount > 1)
-            {
-                thread mauser_reward((853, -2610, 355), (0, 60, 0));
-            }
-            if (pcount > 2)
-            {
-                thread mauser_reward((989, -2575, 355), (0, 150, 0));
-            }
-            if (pcount > 3)
-            {
-                thread mauser_reward((962, -2453, 355), (0, 240, 0));
-            }
-        }
-#endif
 #ifdef DEV_AWARD_TOMB_CHALLENGES
         register_on_gauntlet_start_of_this_round(::gauntlet_award_challenges);
 #endif
+        register_on_gauntlet_start_of_this_round(::_dev_set_side_challenges);
         register_on_gauntlet_start_of_this_round(::_dev_powerup_gens);
         register_on_gauntlet_start_of_this_round(::_dev_build_craftables);
         register_on_gauntlet_start_of_this_round(::_dev_handle_doors);
@@ -7456,6 +7428,45 @@ zone_friendly_name(zone)
 #endif
 }
 
+_dev_set_side_challenges()
+{
+    TRACE("_dev_set_side_challenges");
+#ifdef DEV_SET_EASTEREGGS
+    if (level.start_round > 6)
+    {
+        b2_flag_set(FLAG_MONK_CHALLENGE);
+        thread _refund_next_purchase();
+    }
+    if (level.start_round > 13)
+    {
+        b2_flag_set(FLAG_ZONE_CHALLENGE);
+        thread upgrade_wallbuys();
+    }
+    if (level.start_round >= 19)
+    {
+        b2_flag_set(FLAG_DMG_CHALLENGE);
+        pcount = clamp_int(level.players.size, 1, 4);
+        thread mauser_reward((829, -2487, 355), (0, 330, 0));
+        if (pcount > 1)
+        {
+            thread mauser_reward((853, -2610, 355), (0, 60, 0));
+        }
+        if (pcount > 2)
+        {
+            thread mauser_reward((989, -2575, 355), (0, 150, 0));
+        }
+        if (pcount > 3)
+        {
+            thread mauser_reward((962, -2453, 355), (0, 240, 0));
+        }
+    }
+    if (level.start_round >= 26)
+    {
+        thread double_tap_reward_gen6();
+    }
+#endif
+}
+
 _dev_powerup_gens()
 {
     TRACE("_dev_powerup_gens");
@@ -7489,6 +7500,10 @@ _dev_build_craftables()
     {
         build_craftable("tomb_shield_zm");
         build_craftable("equip_dieseldrone_zm");
+        build_craftable("elemental_staff_fire");
+        build_craftable("elemental_staff_air");
+        build_craftable("elemental_staff_lightning");
+        build_craftable("elemental_staff_water");
         pick_up_craftable_parts("gramophone");
     }
 #endif
