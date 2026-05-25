@@ -235,6 +235,9 @@ setup_game()
             }
         }
 #endif
+#ifdef DEV_AWARD_TOMB_CHALLENGES
+        register_on_gauntlet_start_of_this_round(::gauntlet_award_challenges);
+#endif
         thread _dev_handle_doors();
     }
 #endif
@@ -2124,6 +2127,52 @@ gauntlet_dig_spots_respawn(a_dig_spots)
             }
         }
     }
+}
+
+gauntlet_award_challenges(only_challenges = [])
+{
+    TRACE("gauntlet_award_challenges " + sstr(only_challenges));
+    foreach (player in level.players)
+    {
+        if (only_challenges.size == 0 || isinarray(only_challenges, "zc_headshots"))
+        {
+            player gauntlet_award_challenge_to_player("zc_headshots");
+        }
+        if (only_challenges.size == 0 || isinarray(only_challenges, "zc_zone_captures"))
+        {
+            player gauntlet_award_challenge_to_player("zc_zone_captures");
+        }
+        if (only_challenges.size == 0 || isinarray(only_challenges, "zc_points_spent"))
+        {
+            player gauntlet_award_challenge_to_player("zc_points_spent");
+        }
+    }
+
+    if (only_challenges.size == 0 || isinarray(only_challenges, "zc_boxes_filled"))
+    {
+        level increment_stat("zc_boxes_filled", 4);
+    }
+}
+
+gauntlet_award_challenge_to_player(challenge)
+{
+    TRACE(sstr(self) + " gauntlet_award_challenge_to_player " + sstr(challenge));
+
+    num = 0;
+    switch (challenge)
+    {
+        case "zc_headshots":
+            num = 115;
+            break;
+        case "zc_zone_captures":
+            num = 6;
+            break;
+        case "zc_points_spent":
+            num = 30000;
+            break;
+    }
+
+    self increment_stat(challenge, num);
 }
 
 guard_panzer_round()
