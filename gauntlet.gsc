@@ -245,6 +245,9 @@ setup_game()
 #ifdef DEV_AWARD_TOMB_CHALLENGES
         register_on_gauntlet_start_of_this_round(::gauntlet_award_challenges);
 #endif
+#ifdef DEV_ACTIVATE_TOMB_GENS
+        register_on_gauntlet_start_of_this_round(::_dev_powerup_gens);
+#endif
         thread _dev_handle_doors();
     }
 #endif
@@ -7248,6 +7251,21 @@ zone_friendly_name(zone)
     return name + " (" + zone + ")";
 #else
     return name;
+#endif
+}
+
+_dev_powerup_gens()
+{
+    TRACE("_dev_powerup_gens");
+#ifdef DEV_ACTIVATE_TOMB_GENS
+    foreach (zone in level.zone_capture.zones)
+    {
+        zone maps\mp\zm_tomb_capture_zones::set_player_controlled_area();
+        zone.n_current_progress = 100;
+        zone maps\mp\zm_tomb_capture_zones::generator_state_power_up();
+        level setclientfield(zone.script_noteworthy, zone.n_current_progress / 100);
+        wait_network_frame();
+    }
 #endif
 }
 

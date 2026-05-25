@@ -3,6 +3,7 @@
 
 // #define DEV_SET_EASTEREGGS
 // #define DEV_AWARD_TOMB_CHALLENGES
+// #define DEV_ACTIVATE_TOMB_GENS
 
 /* Inspection can cause ils, use only when needed */
 #define MUTE_INSPECT_DAMAGE
