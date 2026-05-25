@@ -210,7 +210,7 @@ At least one zombie must be killed with a monkey bomb. Once completed, the next 
 
 ## Round 13 - Zone Challenge
 
-At least one player has to kill at least one zombie while being in 7 + 1 per player distinct zones. Once the progress level of this challenge is past 50%, the zone hud will be colored if player is in a zone he's already killed a zombie in before. Each player has a separate progress level, but only one has to complete the challenge to get the reward. The reward is automatically upgraded wallbuy guns if purchased while crouched or prone before round 20. Additionally it makes the Mauser reward be upgraded, and increases changes of getting upgraded guns during gungame from 15% to 25% and from 25% to 35% respectively.
+At least one player has to kill at least one zombie while being in 7 + 1 per player distinct zones. Once the progress level of this challenge is past 50%, the zone hud will be colored if player is in a zone he's already killed a zombie in before. Each player has a separate progress level, but only one has to complete the challenge to get the reward. The reward is automatically upgraded wallbuy guns if purchased while crouched or prone before round 29. Additionally it makes the Mauser reward be upgraded, and increases changes of getting upgraded guns during gungame from 15% to 25% and from 25% to 35% respectively.
 
 ## Round 18 - Mauser Challenge
 

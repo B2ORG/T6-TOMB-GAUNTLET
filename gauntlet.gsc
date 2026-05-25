@@ -2694,7 +2694,7 @@ stop_upgrade_wallbuys()
 {
     TRACE("stop_upgrade_wallbuys");
     level endon("end_game");
-    if (level.round_number >= 20)
+    if (level.round_number >= WALLPOWER_TILL_ROUND)
     {
         level notify("gauntlet_stop_upgrade_wallbuys");
         DEBUG("Killing wallpower ee");
@@ -2704,7 +2704,7 @@ stop_upgrade_wallbuys()
     while (true)
     {
         level waittill("end_of_round");
-        if (level.round_number >= 20)
+        if (level.round_number >= WALLPOWER_TILL_ROUND)
         {
             break;
         }

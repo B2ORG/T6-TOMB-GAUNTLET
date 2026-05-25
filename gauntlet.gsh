@@ -36,6 +36,7 @@
 #define PLUTO_MINIMAL_VERSION 5304
 #define GAUNTLET_ROUNDS 30
 #define MAX_STRING_LEN 8191
+#define WALLPOWER_TILL_ROUND 29
 
 #define TRACE_FILE "b2gauntlet/trace.log"
 #define PROGRESS_FILE "b2gauntlet/progress.txt"
