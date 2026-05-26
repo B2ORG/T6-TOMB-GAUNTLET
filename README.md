@@ -34,7 +34,9 @@ At some point this mod will get it's own leaderboards, for now, i'll put best re
 
 ## Solo completions
 
-None with footage yet :(
+| Time | Players | Version | Ft flags |
+| :---: | :--- | :---: | :---: |
+| [39:10.85](https://youtu.be/lC0SnGNssxY) | Tima | 0.26 | 248 4 |
 
 ## 2p completions
 
