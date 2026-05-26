@@ -152,6 +152,13 @@ main()
         DEBUG("replacefunc reward_double_tap");
         replacefunc(fn, ::gauntlet_reward_double_tap);
     }
+
+    fn = getfunction("maps/mp/zm_tomb_craftables", "randomize_craftable_spawns");
+    if (isdefined(fn))
+    {
+        DEBUG("replacefunc randomize_craftable_spawns");
+        replacefunc(fn, ::gauntlet_randomize_craftable_spawns);
+    }
 }
 
 init()
@@ -2406,6 +2413,42 @@ gauntlet_award_challenge_to_player(challenge)
     }
 
     self increment_stat(challenge, num);
+}
+
+gauntlet_randomize_craftable_spawns()
+{
+    a_randomized_craftables = array("gramophone_vinyl_ice", "gramophone_vinyl_air", "gramophone_vinyl_elec", "gramophone_vinyl_fire", "gramophone_vinyl_master", "gramophone_vinyl_player");
+
+    foreach (str_craftable in a_randomized_craftables)
+    {
+        s_original_pos = getstruct(str_craftable, "targetname");
+        a_alt_locations = getstructarray(str_craftable + "_alt", "targetname");
+
+        if (str_craftable == "gramophone_vinyl_elec")
+        {
+            foreach (idx, alt_location in a_alt_locations)
+            {
+                if (alt_location.origin == (3503.5, 1240.5, -295))
+                {
+                    DEBUG("Removing " + sstr(str_craftable) + " location: " + sstr(alt_location));
+                    arrayremoveindex(a_alt_locations, idx, false);
+                    break;
+                }
+            }
+        }
+        
+        n_loc_index = randomintrange(0, a_alt_locations.size + 1);
+
+        if (n_loc_index == a_alt_locations.size)
+        {
+            continue;
+        }
+        else
+        {
+            s_original_pos.origin = a_alt_locations[n_loc_index].origin;
+            s_original_pos.angles = a_alt_locations[n_loc_index].angles;
+        }
+    }
 }
 
 guard_panzer_round()
