@@ -1132,7 +1132,7 @@ take_round_snapshot()
 save_player_origin_when_safe(player)
 {
     TRACE(sstr(self) + " save_player_origin_when_safe " + sstr(player));
-    while (!is_player_valid(player) || !player isonground() || !check_point_in_playable_area(player.origin) || is_true(self.teleporting))
+    while (!is_player_valid(player) || !player isonground() || !check_point_in_playable_area(player.origin) || is_true(player.teleporting))
     {
         wait 0.05;
     }
