@@ -464,6 +464,7 @@ gauntlet_main_loop()
                 thread wrap_gauntlet_round(::double_ammo_consumption);
                 break;
             case 27:
+                register_on_gauntlet_start_of_this_round(::terminate_drone_for_a_round);
                 thread wrap_gauntlet_round(::absurd_powerups);
                 break;
             case 28:
