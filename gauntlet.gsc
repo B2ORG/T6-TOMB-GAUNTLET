@@ -1700,7 +1700,6 @@ pick_up_doubletap(player)
         && !player hacker_active()
         && !player hasperk("specialty_rof")
         && !player has_perk_paused("specialty_rof")
-        && player get_perk_array().size < player get_player_perk_purchase_limit()
     )
     {
         level thread vending_trigger_post_think(player, "specialty_rof");
