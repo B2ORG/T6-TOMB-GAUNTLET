@@ -926,9 +926,11 @@ snapshot_restore(remove_quickrevive, go_back_a_round)
             player notify(active_perk + "_stop");
         }
         /* Round 23 */
-        self._gauntlet_killed_with_mine = undefined;
-        self._gauntlet_killed_with_stick = undefined;
-        self._gauntlet_killed_with_shield = undefined;
+        b2_flag_clear(P_FLAG_BOB_KILL_MINE, player);
+        b2_flag_clear(P_FLAG_BOB_KILL_STICK, player);
+        b2_flag_clear(P_FLAG_BOB_KILL_SHIELD, player);
+        b2_flag_clear(P_FLAG_BOB_KILL_DRONE, player);
+        b2_flag_clear(FLAG_BOB_KILL_DRONE);
     }
 
     level.round_hud settext("0:00");
@@ -5168,23 +5170,24 @@ _player_killed_with_equipment()
     killed_with = self get_last_damageweapon();
     if (is_placeable_mine(self get_last_damageweapon(true, 32)))
     {
-        self.attacker._gauntlet_killed_with_mine = true;
-        DEBUG("set _gauntlet_killed_with_mine for " + sstr(self.attacker));
+        b2_flag_set(P_FLAG_BOB_KILL_MINE, self.attacker);
+        DEBUG("set bob mine completion for " + sstr(self.attacker));
     }
     if (killed_with == "staff_revive_zm")
     {
-        self.attacker._gauntlet_killed_with_stick = true;
-        DEBUG("set _gauntlet_killed_with_stick for " + sstr(self.attacker));
+        b2_flag_set(P_FLAG_BOB_KILL_STICK, self.attacker);
+        DEBUG("set bob stick completion for " + sstr(self.attacker));
     }
     if (issubstr(killed_with, "shield_zm"))
     {
-        self.attacker._gauntlet_killed_with_shield = true;
-        DEBUG("set _gauntlet_killed_with_shield for " + sstr(self.attacker));
+        b2_flag_set(P_FLAG_BOB_KILL_SHIELD, self.attacker);
+        DEBUG("set bob shield completion for " + sstr(self.attacker));
     }
     if (killed_with == "quadrotorturret_zm" || killed_with == "quadrotorturret_upgraded_zm")
     {
-        level._gauntlet_killed_with_drone = true;
-        DEBUG("set _gauntlet_killed_with_drone by " + sstr(self.attacker.player_owner));
+        b2_flag_set(P_FLAG_BOB_KILL_DRONE, self.attacker.player_owner);
+        b2_flag_set(FLAG_BOB_KILL_DRONE);
+        DEBUG("set bob drone completion for " + sstr(self.attacker.player_owner));
     }
 }
 
@@ -5200,16 +5203,17 @@ _equipment_kills_thread()
     {
         foreach (player in level.players)
         {
-            player_equipment_progress[STR(player.entity_num)] = is_true(player._gauntlet_killed_with_mine) + is_true(player._gauntlet_killed_with_stick) + is_true(player._gauntlet_killed_with_shield) + is_true(level._gauntlet_killed_with_drone);
+            progress = (b2_flag(P_FLAG_BOB_KILL_MINE, player) ? 1 : 0)
+                    + (b2_flag(P_FLAG_BOB_KILL_STICK, player) ? 1 : 0)
+                    + (b2_flag(P_FLAG_BOB_KILL_SHIELD, player) ? 1 : 0)
+                    + (b2_flag(FLAG_BOB_KILL_DRONE) ? 1 : 0);
 
-            if (player_equipment_progress[STR(player.entity_num)] >= 4)
+            status = CHALLENGE_STATUS_NEW;
+            if (progress)
             {
-                player set_status(CHALLENGE_STATUS_SUCCESS, goal_string(player_equipment_progress[STR(player.entity_num)]));
+                status = progress >= 4 ? CHALLENGE_STATUS_SUCCESS : CHALLENGE_STATUS_IN_PROGRESS;
             }
-            else if (player_equipment_progress[STR(player.entity_num)])
-            {
-                player set_status(CHALLENGE_STATUS_IN_PROGRESS, goal_string(player_equipment_progress[STR(player.entity_num)]));
-            }
+            player set_status(status, goal_string(progress));
         }
 
         wait 0.05;
