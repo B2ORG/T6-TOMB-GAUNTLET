@@ -362,7 +362,12 @@ gauntlet_main_loop()
                 thread wrap_gauntlet_round(::watch_for_digging, min_int(players.size, 4));
                 break;
             case 7:
-                _r7_kill_count = players.size == 1 ? 6 : 12;
+                _r7_kill_count = 12;
+                if (players.size <= 1)
+                {
+                    _r7_kill_count = 6;
+                    register_on_gauntlet_start_of_this_round(::disable_zombie_blood_for_a_round);
+                }
                 thread wrap_gauntlet_round(::count_melee_kills, _r7_kill_count);
                 break;
             case 8:
@@ -1285,6 +1290,21 @@ enable_nukes()
     TRACE("enable_nukes");
     level.zombie_powerups["nuke"].func_should_drop_with_regular_powerups = ::yes;
     arrayremovevalue(level.gauntlet_disabled_dig_powerups, "nuke", false);
+}
+
+disable_zombie_blood_for_a_round()
+{
+    TRACE("disable_zombie_blood_for_a_round");
+    level.zombie_powerups["zombie_blood"].func_should_drop_with_regular_powerups = ::no;
+    level.gauntlet_disabled_dig_powerups[level.gauntlet_disabled_dig_powerups.size] = "zombie_blood";
+    register_on_gauntlet_end_of_this_round(::enable_zombie_blood);
+}
+
+enable_zombie_blood()
+{
+    TRACE("enable_zombie_blood");
+    level.zombie_powerups["zombie_blood"].func_should_drop_with_regular_powerups = ::yes;
+    arrayremovevalue(level.gauntlet_disabled_dig_powerups, "zombie_blood", false);
 }
 
 build_craftable(craftable)
