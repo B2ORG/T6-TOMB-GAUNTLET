@@ -391,6 +391,7 @@ gauntlet_main_loop()
                     _r12_staff_count = 2;
                 if (players.size > 3)
                     _r12_staff_count = 3;
+                register_on_gauntlet_start_of_this_round(::disable_nukes_for_a_round);
                 register_on_gauntlet_start_of_this_round(::dig_more_zombies);
                 register_on_gauntlet_end_of_this_round(::check_staff_progress);
                 thread wrap_gauntlet_round(::watch_for_staff_upgrade, _r12_staff_count);
