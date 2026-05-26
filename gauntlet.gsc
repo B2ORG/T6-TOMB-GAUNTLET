@@ -1146,7 +1146,7 @@ freeze_round_zombie_count()
     level endon("end_round");
     level endon("gauntlet_unfreeze_round");
 
-    current_zombies_in_the_round = level.zombie_total + get_round_enemy_array().size;
+    current_zombies_in_the_round = get_round_count();
     level.gauntlet_zombie_spawn_callback_logic = ::set_no_points_and_powerups;
     fn = getfunction("maps/mp/zombies/_zm_weap_staff_lightning", "staff_lightning_kill_zombie");
     replacefunc(fn, ::_staff_lighting_kill_zombie_no_points);
