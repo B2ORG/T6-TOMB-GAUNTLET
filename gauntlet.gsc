@@ -299,6 +299,8 @@ setup_game()
     level.gauntlet_dig_spots_respawn_override = undefined;
     /* Round 15 gen recapture last state */
     level.gauntlet_last_gen_recapture = undefined;
+    /* Last end of round time stored using zombie counter */
+    level._gauntlet_last_zombie_killed_time = undefined;
 
     foreach (player in level.players)
     {
@@ -484,6 +486,7 @@ gauntlet_main_loop()
                 thread wrap_gauntlet_round(::gungame);
                 break;
             case 30:
+                register_on_gauntlet_start_of_this_round(::save_all_zombies_killed_finish_time);
                 register_on_gauntlet_start_of_this_round(::dynamic_round);
                 register_on_gauntlet_start_of_this_round(::panzer_round);
                 register_on_gauntlet_start_of_this_round(::flash_hash);
@@ -1429,6 +1432,18 @@ piece_unspawn()
     }
 
     self.unitrigger = undefined;
+}
+
+save_all_zombies_killed_finish_time()
+{
+    TRACE("save_all_zombies_killed_finish_time");
+    level endon("end_game");
+    level endon("start_of_round");
+    while (get_round_count() > 0)
+    {
+        wait 0.05;
+    }
+    level._gauntlet_last_zombie_killed_time = gettime();
 }
 
 terminate_drone_for_a_round()
@@ -6638,6 +6653,9 @@ player_gauntlet_hud()
 custom_win_screen()
 {
     TRACE("custom_win_screen");
+    DEBUG("_gauntlet_last_zombie_killed_time: " + sstr(level._gauntlet_last_zombie_killed_time));
+    end_time = isdefined(level._gauntlet_last_zombie_killed_time) ? level._gauntlet_last_zombie_killed_time : gettime();
+
     win_hud = createserverfontstring("default" , 2.4);
     win_hud setpoint("CENTER", "CENTER", 0, -50);
     win_hud.alpha = 0;
@@ -6648,7 +6666,7 @@ custom_win_screen()
     win_hud2 = createserverfontstring("default" , 2.2);
     win_hud2 setpoint("CENTER", "CENTER", 0, -25);
     win_hud2.alpha = 0;
-    win_hud2 settext("TIME: " + convert_time(gettime() - level.gauntlet_game_start, TIME_MMSSVV)); 
+    win_hud2 settext("TIME: " + convert_time(end_time - level.gauntlet_game_start, TIME_MMSSVV)); 
     win_hud2 fadeovertime(1);
     win_hud2.alpha = 1;
 
