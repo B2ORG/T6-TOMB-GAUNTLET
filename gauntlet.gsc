@@ -1265,15 +1265,16 @@ b2_flag_clear(flag, player)
     }
 }
 
-yes()
 {
-    TRACE("yes");
+yes(a1, a2, a3, a4, a5)
+{
+    TRACE("yes " + sstr(a1) + " " + sstr(a2) + " " + sstr(a3) + " " + sstr(a4) + " " + sstr(a5));
     return true;
 }
 
-no()
+no(a1, a2, a3, a4, a5)
 {
-    TRACE("no");
+    TRACE("no " + sstr(a1) + " " + sstr(a2) + " " + sstr(a3) + " " + sstr(a4) + " " + sstr(a5));
     return false;
 }
 
