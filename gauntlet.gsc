@@ -159,6 +159,20 @@ main()
         DEBUG("replacefunc randomize_craftable_spawns");
         replacefunc(fn, ::gauntlet_randomize_craftable_spawns);
     }
+
+    fn = getfunction("maps/mp/zm_tomb_craftables", "quadrotor_set_available");
+    if (isdefined(fn))
+    {
+        DEBUG("replacefunc quadrotor_set_available");
+        replacefunc(fn, ::gauntlet_quadrotor_set_available);
+    }
+
+    fn = getfunction("maps/mp/zm_tomb_craftables", "tomb_custom_craftable_validation");
+    if (isdefined(fn))
+    {
+        DEBUG("replacefunc tomb_custom_craftable_validation");
+        replacefunc(fn, ::gauntlet_tomb_custom_craftable_validation);
+    }
 }
 
 init()
@@ -308,6 +322,8 @@ setup_game()
     level.gauntlet_last_gen_recapture = undefined;
     /* Last end of round time stored using zombie counter */
     level._gauntlet_last_zombie_killed_time = undefined;
+    /* If defined, is injected into the original callback for custom_craftable_validation*/
+    level.gauntlet_custom_craftable_validation = undefined;
 
     foreach (player in level.players)
     {
@@ -489,7 +505,7 @@ gauntlet_main_loop()
             case 29:
                 register_on_gauntlet_start_of_this_round(::terminate_staffs);
                 register_on_gauntlet_start_of_this_round(::disable_buildables_pickup_for_a_round);
-                register_on_gauntlet_start_of_this_round(::terminate_drone);
+                register_on_gauntlet_start_of_this_round(::terminate_drone_for_a_round);
                 thread wrap_gauntlet_round(::gungame);
                 break;
             case 30:
@@ -915,11 +931,6 @@ snapshot_restore(remove_quickrevive, go_back_a_round)
     {
         level._gauntlet_melee_kills_callback = 0;
     }
-    /* Round 23 */
-    if (isdefined(level._gauntlet_killed_with_drone))
-    {
-        level._gauntlet_killed_with_drone = undefined;
-    }
 
     foreach (player in players)
     {
@@ -942,7 +953,7 @@ snapshot_restore(remove_quickrevive, go_back_a_round)
 
     level.round_hud settext("0:00");
     reset_vars();
-    terminate_drone();
+    terminate_drone(false);
     zombie_goto_round(level.round_number);
 
     DEBUG("Restoring snapshots: " + sstr(level.gauntlet_round_snapshot));
@@ -984,33 +995,64 @@ snapshot_restore_guns(weapon_snap)
     {
         self give_start_weapon(true);
         self giveweapon("knife_zm");
+        return;
     }
 
+    non_primaries = [];
+    primaries = [];
     foreach (weapondata in weapon_snap)
+    {
+        if (!isdefined(weapondata["name"]))
+        {
+            continue;
+        }
+        if (isweaponprimary(weapondata["name"]))
+        {
+            primaries[primaries.size] = weapondata;
+        }
+        else
+        {
+            non_primaries[non_primaries.size] = weapondata;
+        }
+    }
+
+    /* Non primaries first - prevent any logic holes in weapon_give for wpn swap */
+    foreach (weapondata in non_primaries)
     {
         if (self _snapshot_restore_gun_special(weapondata))
         {
             DEBUG("Restore special: " + sstr(weapondata["name"]));
             continue;
         }
-        if (isweaponprimary(weapondata["name"]))
-        {
-            DEBUG("Restore primary: " + sstr(weapondata["name"]));
-            if (primaries > get_player_weapon_limit(self))
-            {
-                continue;
-            }
-            primaries++;
-        }
         self weapondata_give(weapondata);
-        DEBUG("Restoring weapon to " + sstr(self.name) + " " + sstr(weapondata));
-
-        if (isweaponprimary(weapondata["name"]) && primaries == 1)
+        if (isdefined(level.zombie_melee_weapon_list[weapondata["name"]]))
         {
-            DEBUG("Restore switchto: " + sstr(weapondata["name"]));
-            self switchtoweapon(weapondata["name"]);
+            b2_flag_set(P_FLAG_GAUNTLET_RESTORED_MELEE_CUSTOM, self);
         }
     }
+    if (!b2_flag(P_FLAG_GAUNTLET_RESTORED_MELEE_CUSTOM, self))
+    {
+        self giveweapon("knife_zm");
+        b2_flag_set(P_FLAG_GAUNTLET_RESTORED_MELEE_CUSTOM, self);
+    }
+
+    for (i = 0; i < get_player_weapon_limit(self) && i < primaries.size; i++)
+    {
+        if (self _snapshot_restore_gun_special(primaries[i]))
+        {
+            DEBUG("Restore special: " + sstr(primaries[i]["name"]));
+            continue;
+        }
+        self weapondata_give(primaries[i]);
+        if (!b2_flag(P_FLAG_GAUNTLET_SWAPPED_PRIMARY_CUSTOM, self))
+        {
+            self switchtoweapon(primaries[i]["name"]);
+            b2_flag_set(P_FLAG_GAUNTLET_SWAPPED_PRIMARY_CUSTOM, self);
+        }
+    }
+
+    b2_flag_clear(P_FLAG_GAUNTLET_RESTORED_MELEE_CUSTOM, self);
+    b2_flag_clear(P_FLAG_GAUNTLET_SWAPPED_PRIMARY_CUSTOM, self);
 }
 
 snapshot_restore_perks(perk_snap, remove_quickrevive)
@@ -1051,16 +1093,7 @@ _snapshot_restore_gun_special(weapondata)
     switch (weapondata["name"])
     {
         case "equip_dieseldrone_zm":
-            foreach (craftable_unitrigger in level.a_uts_craftables)
-            {
-                // DEBUG("unitrigger=" + sstr(craftable_unitrigger) + " fields= " + sstr(craftable_unitrigger getfieldkeys()));
-                if (craftable_unitrigger.equipname != "equip_dieseldrone_zm")
-                {
-                    continue;
-                }
-                craftable_unitrigger setup_quadrotor_purchase(self);
-                break;
-            }
+            self weapondata_give(weapondata);
             return true;
     }
     return false;
@@ -1265,7 +1298,72 @@ b2_flag_clear(flag, player)
     }
 }
 
+b2_flag_wait(flag, player)
 {
+    TRACE("b2_flag_wait " + sstr(flag) + " " + sstr(player));
+    if (typeof(player) == "entity" && isplayer(player))
+    {
+        player endon("disconnect");
+    }
+
+    while (!b2_flag(flag, player))
+    {
+        wait 0.05;
+    }
+}
+
+b2_flag_waitopen(flag, player)
+{
+    TRACE("b2_flag_waitopen " + sstr(flag) + " " + sstr(player));
+    if (typeof(player) == "entity" && isplayer(player))
+    {
+        player endon("disconnect");
+    }
+
+    while (b2_flag(flag, player))
+    {
+        wait 0.05;
+    }
+}
+
+b2_flag_wait_timeout(flag, player, timeout_ms)
+{
+    TRACE("b2_flag_wait_timeout " + sstr(flag) + " " + sstr(player) + " " + sstr(timeout_ms));
+    start = gettime();
+    if (typeof(player) == "entity" && isplayer(player))
+    {
+        player endon("disconnect");
+    }
+
+    while (!b2_flag(flag, player))
+    {
+        if (start + timeout_ms >= gettime())
+        {
+            break;
+        }
+        wait 0.05;
+    }
+}
+
+b2_flag_waitopen_timeout(flag, player, timeout_ms)
+{
+    TRACE("b2_flag_waitopen_timeout " + sstr(flag) + " " + sstr(player) + " " + sstr(timeout_ms));
+    start = gettime();
+    if (typeof(player) == "entity" && isplayer(player))
+    {
+        player endon("disconnect");
+    }
+
+    while (b2_flag(flag, player))
+    {
+        if (start + timeout_ms >= gettime())
+        {
+            break;
+        }
+        wait 0.05;
+    }
+}
+
 yes(a1, a2, a3, a4, a5)
 {
     TRACE("yes " + sstr(a1) + " " + sstr(a2) + " " + sstr(a3) + " " + sstr(a4) + " " + sstr(a5));
@@ -1459,30 +1557,101 @@ save_all_zombies_killed_finish_time()
 terminate_drone_for_a_round()
 {
     TRACE("terminate_drone_for_a_round");
-    terminate_drone();
-    thread debounce_drone_damage_for_a_round();
+    register_on_gauntlet_end_of_this_round(::unlock_drone);
+    terminate_drone(true);
 }
 
-terminate_drone()
+terminate_drone(set_flag = false)
 {
     TRACE("terminate_drone");
-    level notify("drone_should_return");
+    if (set_flag)
+    {
+        b2_flag_set(FLAG_GAUNTLET_DRONE_LOCK);
+    }
+    /* Drone on the map - kill it */
+    if (isdefined(level.maxis_quadrotor))
+    {
+        level.maxis_quadrotor dodamage(200, level.maxis_quadrotor.origin);
+        level.maxis_quadrotor delete();
+        level.maxis_quadrotor = undefined;
+    }
+    /* Drone on the table - disable the table */
+    level.gauntlet_custom_craftable_validation = ::drone_craftable_disable;
+    /* Drone in the equipment - kill action slot */
+    foreach (player in level.players)
+    {
+        if (!player hasweapon("equip_dieseldrone_zm"))
+        {
+            continue;
+        }
+        player setactionslot(2, "");
+    }
 }
 
-debounce_drone_damage_for_a_round()
+unlock_drone()
 {
-    TRACE("debounce_drone_damage");
-    b2_flag_set(FLAG_DRONE_DISABLED);
-    level.gauntlet_actor_damage_world_logic = ::debounce_drone_damage;
-    level waittill("end_of_round");
-    level.gauntlet_actor_damage_world_logic = undefined;
-    b2_flag_clear(FLAG_DRONE_DISABLED);
+    TRACE("unlock_drone");
+    b2_flag_clear(FLAG_GAUNTLET_DRONE_LOCK);
+    if (eq(level.gauntlet_custom_craftable_validation, ::drone_craftable_disable))
+    {
+        level.gauntlet_custom_craftable_validation = undefined;
+    }
+
+    foreach (player in level.players)
+    {
+        if (!player hasweapon("equip_dieseldrone_zm"))
+        {
+            continue;
+        }
+
+        craftable = get_current_drone_craftable();
+        if (isdefined(craftable) && isdefined(craftable.stub.craftablestub.use_actionslot))
+        {
+            player setactionslot(craftable.stub.craftablestub.use_actionslot, "weapon", "equip_dieseldrone_zm");
+        }
+        else
+        {
+            player setactionslot(2, "weapon", "equip_dieseldrone_zm");
+        }
+    }
 }
 
 debounce_drone_damage(inflictor, attacker, damage, flags, meansofdeath, weapon, vpoint, vdir, shitloc, psoffsettime, boneindex)
 {
     TRACE(sstr(self) + " debounce_drone_damage_for_a_round " + sstr(inflictor) + " " + sstr(attacker) + " " + sstr(damage) + " " + sstr(flags) + " " + sstr(meansofdeath) + " " + sstr(weapon) + " " + sstr(vpoint) + " " + sstr(vdir) + " " + sstr(shitloc) + " " + sstr(psoffsettime) + " " + sstr(boneindex));
     return eq(weapon, "quadrotorturret_zm") ? 0 : damage;
+}
+
+get_current_drone_craftable()
+{
+    TRACE("get_current_drone_craftable");
+    craftable_with_drone = undefined;
+    foreach (craftable_unitrigger in level.a_uts_craftables)
+    {
+        craftable = craftable_unitrigger.craftablespawn.stub.craftablespawn;
+        // DEBUG(sstr(craftable));
+        if (!isdefined(craftable) || !isdefined(craftable.stub) || !eq(craftable.stub.weaponname, "equip_dieseldrone_zm"))
+        {
+            continue;
+        }
+        return craftable;
+    }
+    return undefined;
+}
+
+drone_craftable_disable(player)
+{
+    TRACE("drone_craftable_disable " + sstr(player));
+    if (self.stub.equipname == "equip_dieseldrone_zm")
+    {
+        level.quadrotor_status.pickup_trig = self.stub;
+
+        if (is_true(level.quadrotor_status.crafted))
+        {
+            return false;
+        }
+    }
+    return undefined;
 }
 
 more_monkeys_in_the_box()
@@ -2663,10 +2832,9 @@ terminate_staffs()
 disable_buildables_pickup_for_a_round()
 {
     TRACE("disable_buildables_pickup");
-    saved_custom_craftable_validation = level.custom_craftable_validation;
-    level.custom_craftable_validation = ::no;
+    level.gauntlet_custom_craftable_validation = ::no;
     level waittill("end_of_round");
-    level.custom_craftable_validation = saved_custom_craftable_validation;
+    level.gauntlet_custom_craftable_validation = undefined;
 }
 
 dynamic_round()
@@ -6469,6 +6637,60 @@ gauntlet_player_out_of_playable_area_monitor()
 
         wait get_player_out_of_playable_area_monitor_wait_time();
     }
+}
+
+gauntlet_quadrotor_set_available()
+{
+    TRACE("gauntlet_quadrotor_set_available");
+    playfx(level._effect["tesla_elec_kill"], level.quadrotor_status.pickup_trig.model.origin);
+    level.quadrotor_status.pickup_trig.model playsound("zmb_qrdrone_leave");
+    level.quadrotor_status.picked_up = 0;
+    level.quadrotor_status.pickup_trig.model show();
+    flag_set("quadrotor_cooling_down");
+    str_zone = level.quadrotor_status.str_zone;
+
+    switch (str_zone)
+    {
+        case "zone_nml_9":
+            setclientfield("cooldown_steam", 1);
+            break;
+        case "zone_bunker_5a":
+            setclientfield("cooldown_steam", 2);
+            break;
+        case "zone_village_1":
+            setclientfield("cooldown_steam", 3);
+            break;
+    }
+
+    vox_line = "vox_maxi_drone_cool_down_3";
+    thread maps\mp\zm_tomb_vo::maxissay(vox_line, level.quadrotor_status.pickup_trig.model);
+    wait 60;
+    b2_flag_waitopen(FLAG_GAUNTLET_DRONE_LOCK);
+    flag_clear("quadrotor_cooling_down");
+    setclientfield("cooldown_steam", 0);
+    level.quadrotor_status.pickup_trig trigger_on();
+    vox_line = "vox_maxi_drone_cool_down_4";
+    maps\mp\zm_tomb_vo::maxissay(vox_line, level.quadrotor_status.pickup_trig.model);
+}
+
+gauntlet_tomb_custom_craftable_validation(player)
+{
+    TRACE(sstr(self) + " gauntlet_tomb_custom_craftable_validation " + sstr(player));
+    if (b2_flag(FLAG_STAFFS_DISABLED) && issubstr(self.stub.weaponname, "staff"))
+    {
+        return false;
+    }
+    if (isdefined(level.gauntlet_custom_craftable_validation))
+    {
+        custom_check = self [[level.gauntlet_custom_craftable_validation]](player);
+        if (isdefined(custom_check))
+        {
+            return custom_check;
+        }
+    }
+    fn = getfunction("maps/mp/zm_tomb_craftables", "tomb_custom_craftable_validation");
+    disabledetouronce(fn);
+    return self [[fn]](player);
 }
 
 /*********************************************************************************/
