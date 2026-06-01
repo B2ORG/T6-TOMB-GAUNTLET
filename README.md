@@ -36,19 +36,20 @@ At some point this mod will get it's own leaderboards, for now, i'll put best re
 
 | Time | Players | Version | Ft flags |
 | :---: | :--- | :---: | :---: |
+| [38.22.85](https://youtu.be/3L87XfJZPbM) | DankSlushie | 0.26 | 248 4 |
 | [39:10.85](https://youtu.be/lC0SnGNssxY) | Tima | 0.26 | 248 4 |
 
 ## 2p completions
 
 | Time | Players | Version | Ft flags |
 | :---: | :--- | :---: | :---: |
-| [58:26.85](https://youtu.be/nynZ0-ZqS3U) | Huth & Tima | 0.24 | 186 10 6 |
+| [49:28.85](https://youtu.be/siYzIE4XrXA) | Huth & Tima | 0.26 | 186 2 12 |
 
 ## 3p completions
 
 | Time | Players | Version | Ft flags |
 | :---: | :--- | :---: | :---: |
-| [1:22:19.85](https://youtu.be/PgUClzpdgwo) | Huth, Tima & DankSlushie | 0.24 | 186 2 12 10 |
+| [1:21:17.90](https://youtu.be/dCXBeAY4L1U) | Huth, Tima & DankSlushie | 0.26 | 186 10 2 134 |
 
 ## 4p completions
 
