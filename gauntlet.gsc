@@ -3445,7 +3445,7 @@ _entity_field(ent)
     {
         return "entity_num=" + ent.entity_num;
     }
-    if (isdefined(ent.targetname) && ent.targetname)
+    if (isdefined(ent.targetname) && ent.targetname.size > 0)
     {
         return "targetname=" + ent.targetname;
     }
