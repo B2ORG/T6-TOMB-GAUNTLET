@@ -1418,10 +1418,10 @@ enable_zombie_blood()
     arrayremovevalue(level.gauntlet_disabled_dig_powerups, "zombie_blood", false);
 }
 
-build_craftable(craftable)
+build_craftable(craftable, player)
 {
     TRACE("build_craftable " + sstr(craftable));
-    player = get_players()[0];
+    player = isdefined(player) ? player : gethostplayer();
 
     foreach (stub in level.a_uts_craftables)
     {
@@ -1440,6 +1440,143 @@ build_craftable(craftable)
             return;
         }
     }
+}
+
+take_craftable(craftable, player)
+{
+    TRACE("take_craftable " + sstr(craftable));
+    player = isdefined(player) ? player : gethostplayer();
+
+    foreach (stub in level.zombie_include_craftables)
+    {
+        if (stub.name == craftable)
+        {
+            foreach (piece in stub.a_piecestubs)
+            {
+                piecespawn = piece.piecespawn;
+
+                if (isdefined(piecespawn))
+                {
+                    player player_take_piece(piecespawn);
+                }
+            }
+        }
+    }
+}
+
+build_tomb_staffs()
+{
+    TRACE("build_tomb_staffs");
+    staff_array = [];
+    staff_array[0] = "elemental_staff_lightning";
+    staff_array[1] = "elemental_staff_fire";
+    staff_array[2] = "elemental_staff_water";
+    staff_array[3] = "elemental_staff_air";
+
+    players = get_players();
+    foreach (player_idx, craftable in staff_array)
+    {
+        level notify("player_teleported", players[0], player_idx + 1);
+        wait_network_frame();
+
+        foreach (stub in level.a_uts_craftables)
+        {
+            if (stub.craftablestub.name == craftable)
+            {
+                foreach (piece in stub.craftablespawn.a_piecespawns)
+                {
+                    piecespawn = get_craftable_piece(stub.craftablestub.name, piece.piecename);
+
+                    if (isdefined(piecespawn))
+                    {
+                        if (isdefined(players[player_idx]))
+                        {
+                            DEBUG("building tomb staff " + sstr(stub.craftablestub.name) + " " + sstr(piece.piecename) + " " + sstr(players[player_idx]) + " (" + is_true(piecespawn.piecestub.is_shared) + ")");
+                            players[player_idx] player_take_piece(piecespawn);
+                            if (eq(piece.piecename, "gem"))
+                            {
+                                players[player_idx].current_craftable_piece = piecespawn;
+                            }
+                        }
+                        else if (is_true(piecespawn.piecestub.is_shared))
+                        {
+                            DEBUG("alt building tomb staff " + sstr(piece.piecename) + " " + sstr(players[0]) + " (" + is_true(piecespawn.piecestub.is_shared) + ")");
+                            players[0] player_take_piece(piecespawn);
+                        }
+                        else
+                        {
+                            _queue_staff_gem(piecespawn);
+                        }
+                        wait_network_frame();
+                    }
+                }
+
+                break;
+            }
+        }
+        wait_network_frame();
+    }
+
+    while (isdefined(level._gauntlet_queue_staff_gems) && level._gauntlet_queue_staff_gems.size)
+    {
+        foreach (player in players)
+        {
+            if (isdefined(player.current_craftable_piece))
+            {
+                continue;
+            }
+            key = getarraykeys(level._gauntlet_queue_staff_gems)[0];
+            player player_take_piece(level._gauntlet_queue_staff_gems[key]);
+            player.current_craftable_piece = level._gauntlet_queue_staff_gems[key];
+            arrayremoveindex(level._gauntlet_queue_staff_gems, key);
+        }
+
+        wait 0.1;
+    }
+
+    // flag_set("electric_puzzle_1_complete");
+    // flag_set("electric_puzzle_2_complete");
+    // flag_set("air_puzzle_1_complete");
+    // flag_set("air_puzzle_2_complete");
+    // flag_set("fire_puzzle_1_complete");
+    // flag_set("fire_puzzle_2_complete");
+    // flag_set("ice_puzzle_1_complete");
+    // flag_set("ice_puzzle_2_complete");
+
+    // wait_network_frame();
+
+    // fn = getfunction("maps/mp/zm_tomb_quest_crypt", "chamber_disc_gem_has_clearance");
+    // replacefunc(fn, ::yes);
+    // gems = getentarray("crypt_gem", "script_noteworthy");
+    // foreach (gem in gems)
+    // {
+    //     gem_model = puzzle_orb_chamber_to_crypt(str_orb_path, gem)
+    // }
+
+    // wait_network_frame();
+    // removedetour(fn);
+
+    // flag_wait("staff_air_zm_upgrade_unlocked");
+    // flag_wait("staff_water_zm_upgrade_unlocked");
+    // flag_wait("staff_fire_zm_upgrade_unlocked");
+    // flag_wait("staff_lightning_zm_upgrade_unlocked");
+
+    // wait_network_frame();
+    // foreach (staff in level.a_elemental_staffs)
+    // {
+    //     staff.charger.charges_received = 20;
+    //     self.charger.is_inserted = true;
+    // }
+}
+
+_queue_staff_gem(piecespawn)
+{
+    TRACE("_queue_staff_gem");
+    if (!isdefined(level._gauntlet_queue_staff_gems))
+    {
+        level._gauntlet_queue_staff_gems = [];
+    }
+    level._gauntlet_queue_staff_gems[level._gauntlet_queue_staff_gems.size] = piecespawn;
 }
 
 pick_up_craftable_parts(craftable)
@@ -7822,17 +7959,24 @@ _dev_build_craftables()
     if (level.script == "zm_prison")
     {
         build_craftable("alcatraz_shield_zm");
+        wait_network_frame();
         build_craftable("packasplat");
     }
     else if (level.script == "zm_tomb")
     {
+        for (i = 1; i <= 4; i++)
+        {
+            level notify("player_teleported", gethostplayer(), i);
+            wait_network_frame();
+        }
+        wait_network_frame();
         build_craftable("tomb_shield_zm");
+        wait_network_frame();
         build_craftable("equip_dieseldrone_zm");
-        build_craftable("elemental_staff_fire");
-        build_craftable("elemental_staff_air");
-        build_craftable("elemental_staff_lightning");
-        build_craftable("elemental_staff_water");
-        pick_up_craftable_parts("gramophone");
+        wait_network_frame();
+        take_craftable("gramophone");
+        wait_network_frame();
+        build_tomb_staffs();
     }
 #endif
 }
