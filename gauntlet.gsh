@@ -17,15 +17,15 @@
 #endif
 
 #ifdef ENABLE_DEBUG
-#define DEBUG(__txt) printf("DEBUG [" + convert_time(gettime() - getstarttime(), "m:ss.vv", true) + "] ^5" + __txt);
+#define DEBUG(__txt) printf("DEBUG [" + convert_time(gettime() - getstarttime(), 1, true) + "] ^5" + __txt);
 #define DUMP(__obj) _dump(__obj);
 #else
 #define DEBUG(__txt)
 #define DUMP(__obj)
 #endif
 
-#define WARN(__txt) printf("WARN [" + convert_time(gettime() - getstarttime(), "m:ss.vv", true) + "] ^3" + __txt);
-#define ERROR(__txt) printf("ERROR [" + convert_time(gettime() - getstarttime(), "m:ss.vv", true) + "] ^1" + __txt);debugbox(__txt);
+#define WARN(__txt) printf("WARN [" + convert_time(gettime() - getstarttime(), 1, true) + "] ^3" + __txt);
+#define ERROR(__txt) printf("ERROR [" + convert_time(gettime() - getstarttime(), 1, true) + "] ^1" + __txt);debugbox(__txt);
 
 #define GAUNTLET_SINGLE(__fn) level notify("gauntlet_" + __fn); \
                                 level endon("gauntlet_" + __fn);
