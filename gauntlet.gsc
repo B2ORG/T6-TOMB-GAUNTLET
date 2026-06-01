@@ -2355,6 +2355,11 @@ should_show_r2l_bar()
     TRACE(sstr(self) + " should_show_r2l_bar");
     if (!b2_flag(P_FLAG_NOT_PLAYING, self))
     {
+        zone = self get_current_zone();
+        if (!isdefined(zone))
+        {
+            return false;
+        }
         switch (self get_current_zone())
         {
             case "zone_bunker_6":
