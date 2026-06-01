@@ -5049,6 +5049,7 @@ protect_zone(zones)
     }
 
     thread freeze_round_zombie_count();
+    loop_init = true;
 
     while (time_to_get_there > gettime() && players_in_desired_zones < get_alive_players().size)
     {
@@ -5059,11 +5060,12 @@ protect_zone(zones)
             if (is_player_valid(player) && isinarray(zones, player get_current_zone()))
             {
                 players_in_desired_zones++;
-                if (is_true(player._gauntlet_get_to_zone_hud))
+                if (loop_init || b2_flag(P_FLAG_PLAYER_ZONE_TIMER_RUNNING, player))
                 {
                     player set_status(CHALLENGE_STATUS_SUCCESS, "WAITING FOR OTHER PLAYERS");
                     player hide_timer_status();
-                    player._gauntlet_get_to_zone_hud = undefined;
+                    DEBUG("hiding zone timer for " + sstr(player));
+                    b2_flag_clear(P_FLAG_PLAYER_ZONE_TIMER_RUNNING, player);
                 }
             }
             else
@@ -5075,13 +5077,15 @@ protect_zone(zones)
         foreach (o_player in outside)
         {
             o_player set_status(CHALLENGE_STATUS_IN_PROGRESS, "Time to get to the zone:");
-            if (!is_true(o_player._gauntlet_get_to_zone_hud))
+            if (!b2_flag(P_FLAG_PLAYER_ZONE_TIMER_RUNNING, o_player))
             {
+                DEBUG("starting zone timer for " + sstr(o_player));
                 o_player start_timer_status(time_to_get_there - gettime(), true);
             }
-            o_player._gauntlet_get_to_zone_hud = true;
+            b2_flag_set(P_FLAG_PLAYER_ZONE_TIMER_RUNNING, o_player);
         }
 
+        loop_init = false;
         wait 0.05;
     }
 
