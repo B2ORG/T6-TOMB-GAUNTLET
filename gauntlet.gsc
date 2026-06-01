@@ -1706,7 +1706,6 @@ pick_up_doubletap(player)
         && !is_equipment(str_current_weapon)
         && level.revive_tool != str_current_weapon
         && "none" != str_current_weapon
-        && !player hacker_active()
         && !player hasperk("specialty_rof")
         && !player has_perk_paused("specialty_rof")
     )
@@ -1715,6 +1714,17 @@ pick_up_doubletap(player)
         return true;
     }
 
+    INFO("pick_up_doubletap(" + sstr(player) + ") " + sstr(str_current_weapon) + " "
+        + sstr(b2_flag(P_FLAG_NOT_PLAYING, player)) + " "
+        + sstr(player player_is_in_laststand()) + " "
+        + sstr(is_true(player.is_drinking)) + " "
+        + sstr(is_placeable_mine(str_current_weapon)) + " "
+        + sstr(is_equipment(str_current_weapon)) + " "
+        + sstr(level.revive_tool == str_current_weapon) + " "
+        + sstr("none" == str_current_weapon) + " "
+        + sstr(player hasperk("specialty_rof")) + " "
+        + sstr(player has_perk_paused("specialty_rof"))
+    );
     return false;
 }
 

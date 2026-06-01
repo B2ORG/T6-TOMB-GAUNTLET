@@ -24,6 +24,7 @@
 #define DUMP(__obj)
 #endif
 
+#define INFO(__txt) printf("INFO [" + convert_time(gettime() - getstarttime(), 1, true) + "] ^7" + __txt);
 #define WARN(__txt) printf("WARN [" + convert_time(gettime() - getstarttime(), 1, true) + "] ^3" + __txt);
 #define ERROR(__txt) printf("ERROR [" + convert_time(gettime() - getstarttime(), 1, true) + "] ^1" + __txt);debugbox(__txt);
 
