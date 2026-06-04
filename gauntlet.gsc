@@ -2960,7 +2960,6 @@ terminate_staffs()
 
     wait 0.05;
 
-    hide_staff_model();
     foreach (player in get_alive_players())
     {
         foreach (wpn in player getweaponslist())
@@ -2992,6 +2991,22 @@ terminate_staffs()
     clear_player_staff("staff_fire_zm");
     clear_player_staff("staff_lightning_zm");
     clear_player_staff("staff_water_zm");
+
+    hide_staff_model();
+    b2_flag_set(FLAG_STAFFS_DISABLED);
+
+    // TODO disable trigger at some point
+    foreach (modelname in array("craftable_staff_fire_zm", "craftable_staff_air_zm", "craftable_staff_lightning_zm", "craftable_staff_water_zm"))
+    {
+        model = getent(modelname, "targetname");
+        model.inused = 0;
+        // model trigger_off();
+        model hide();
+    }
+    // foreach (staff in level.a_elemental_staffs)
+    // {
+    //     staff.charge_trigger trigger_off();
+    // }
 }
 
 disable_buildables_pickup_for_a_round()
