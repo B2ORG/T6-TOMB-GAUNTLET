@@ -2782,21 +2782,32 @@ gauntlet_randomize_craftable_spawns()
         s_original_pos = getstruct(str_craftable, "targetname");
         a_alt_locations = getstructarray(str_craftable + "_alt", "targetname");
 
-        if (str_craftable == "gramophone_vinyl_elec")
-        {
-            foreach (idx, alt_location in a_alt_locations)
-            {
-                if (alt_location.origin == (3503.5, 1240.5, -295))
-                {
-                    DEBUG("Removing " + sstr(str_craftable) + " location: " + sstr(alt_location));
-                    arrayremoveindex(a_alt_locations, idx, false);
-                    break;
-                }
-            }
-        }
-        
-        n_loc_index = randomintrange(0, a_alt_locations.size + 1);
+        // DEBUG(sstr(str_craftable) + " => main: " + sstr(s_original_pos) + " alts: " + sstr(a_alt_locations));
+        override_locations = [];
 
+        switch (str_craftable)
+        {
+            case "gramophone_vinyl_master":
+                // Middle
+                override_locations[override_locations.size] = array((154.5, 161.5, 348), (358.078, 211.632, 20.1381));
+                break;
+            case "gramophone_vinyl_elec":
+                // rm (3503.5, 1240.5, -295) (29.2715, 263.571, 25.983) - wind tunnel
+                override_locations[override_locations.size] = array(s_original_pos.origin, s_original_pos.angles);
+                override_locations[override_locations.size] = array((2544.5, 38, 173), (13.2273, 218.371, 65.6638));
+                break;
+        }
+
+        if (override_locations.size) 
+        {
+            rand = override_locations.size < 2 ? override_locations[0] : override_locations[randomint(override_locations.size)];
+            s_original_pos.origin = rand[0];
+            s_original_pos.angles = rand[1];
+            DEBUG("Override location for " + sstr(str_craftable) + ": " + sstr(s_original_pos.origin));
+            continue;
+        }
+
+        n_loc_index = randomintrange(0, a_alt_locations.size + 1);
         if (n_loc_index == a_alt_locations.size)
         {
             continue;
