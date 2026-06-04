@@ -7122,6 +7122,7 @@ player_gauntlet_hud()
     self.gauntlet_zone_hud.color = (0.85, 0.85, 0.85);
 
     self thread _coordinate_hud();
+    self thread _flag_hud();
 
     self._gauntlet_hud_initialized = true;
 }
@@ -7197,8 +7198,8 @@ second_chance_hud(team_size)
 
 _coordinate_hud()
 {
+    TRACE(sstr(self) + " _coordinate_hud");
 #ifdef ENABLE_DEBUG
-    TRACE("_coordinate_hud");
     level endon("end_game");
     self endon("disconnect");
 
@@ -7233,6 +7234,41 @@ _coordinate_hud()
             self.coordinates_x_hud.alpha = 0;
             self.coordinates_y_hud.alpha = 0;
             self.coordinates_z_hud.alpha = 0;
+        }
+
+        wait 0.05;
+    }
+#endif
+}
+
+_flag_hud()
+{
+    TRACE(sstr(self) + " _flag_hud");
+#ifdef ENABLE_DEBUG
+    level endon("end_game");
+    self endon("disconnect");
+
+    own_level_flag_hud = false;
+    if (!isdefined(level.game_flag_hud))
+    {
+        level.game_flag_hud = createserverfontstring("objective", 1.1);
+        level.game_flag_hud setpoint("CENTER", "CENTER", -40, 200);
+        level.game_flag_hud.color = (1, 1, 1);
+        level.game_flag_hud.hidewheninmenu = 0;
+        own_level_flag_hud = true;
+    }
+
+    self.player_flag_hud = self createfontstring("objective" , 1.1);
+    self.player_flag_hud setpoint("CENTER", "CENTER", 40, 200);
+    self.player_flag_hud.color = (1, 1, 1);
+    self.player_flag_hud.hidewheninmenu = 0;
+
+    while (true)
+    {
+        self.player_flag_hud setvalue(level.b2_gauntlet_player_state[STR(self.entity_num)]);
+        if (own_level_flag_hud)
+        {
+            level.game_flag_hud setvalue(level.b2_gauntlet_state);
         }
 
         wait 0.05;
