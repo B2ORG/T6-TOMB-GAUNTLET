@@ -1855,9 +1855,17 @@ mauser_reward_church()
     }
     flag_set("gauntlet_ee_r18");
     b2_flag_set(FLAG_DMG_CHALLENGE);
-    level._game_module_player_damage_callback = ::_no_damage_player_callback;
+    players = get_players();
+    foreach (player in players)
+    {
+        player.player_damage_override = ::_no_damage_player_callback;
+    }
     level waittill("end_of_round");
-    level._game_module_player_damage_callback = undefined;
+    foreach (player in players)
+    {
+        player.player_damage_override = undefined;
+    }
+
     while (level.gauntlet_round < 20)
     {
         level waittill("start_of_round");
@@ -1869,7 +1877,7 @@ mauser_reward_church()
         return;
     }
 
-    pcount = clamp_int(level.players.size, 1, 4);
+    pcount = clamp_int(players.size, 1, 4);
     thread mauser_reward((829, -2487, 355), (0, 330, 0));
     if (pcount > 1)
     {
@@ -1937,7 +1945,7 @@ powerup_round_duration(powerup)
 _no_damage_player_callback(einflictor, eattacker, idamage, idflags, smeansofdeath, sweapon, vpoint, vdir, shitloc, psoffsettime)
 {
     TRACE(sstr(self) + " _no_damage_player_callback " + sstr(einflictor) + " " + sstr(eattacker) + " " + sstr(idamage) + " " + sstr(idflags) + " " + sstr(smeansofdeath) + " " + sstr(sweapon) + " " + sstr(vpoint) + " " + sstr(vdir) + " " + sstr(shitloc) + " " + sstr(psoffsettime));
-    if (is_player_valid(self, false, true) && is_true(eattacker.is_zombie))
+    if (!b2_flag(P_FLAG_NOT_PLAYING, self) && is_true(eattacker.is_zombie) && idamage > 0)
     {
         b2_flag_clear(FLAG_DMG_CHALLENGE);
         b2_flag_set(P_FLAG_DMG_CHALLENGE_FAIL, self);
