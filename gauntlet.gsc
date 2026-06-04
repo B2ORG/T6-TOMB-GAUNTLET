@@ -1517,7 +1517,7 @@ build_tomb_staffs()
         wait_network_frame();
     }
 
-    while (isdefined(level._gauntlet_queue_staff_gems) && level._gauntlet_queue_staff_gems.size)
+    while (isdefined(level._gauntlet_queue_staff_gems) && level._gauntlet_queue_staff_gems.size > 0)
     {
         foreach (player in players)
         {
@@ -1534,23 +1534,51 @@ build_tomb_staffs()
         wait 0.1;
     }
 
-    // flag_set("electric_puzzle_1_complete");
-    // flag_set("electric_puzzle_2_complete");
-    // flag_set("air_puzzle_1_complete");
-    // flag_set("air_puzzle_2_complete");
-    // flag_set("fire_puzzle_1_complete");
-    // flag_set("fire_puzzle_2_complete");
-    // flag_set("ice_puzzle_1_complete");
-    // flag_set("ice_puzzle_2_complete");
+    flag_set("electric_puzzle_1_complete");
+    flag_set("electric_puzzle_2_complete");
+    flag_set("air_puzzle_1_complete");
+    flag_set("air_puzzle_2_complete");
+    flag_set("fire_puzzle_1_complete");
+    flag_set("fire_puzzle_2_complete");
+    flag_set("ice_puzzle_1_complete");
+    flag_set("ice_puzzle_2_complete");
 
-    // wait_network_frame();
+    wait_network_frame();
+    flag_set("staff_air_zm_upgrade_unlocked");
+    flag_set("staff_water_zm_upgrade_unlocked");
+    flag_set("staff_fire_zm_upgrade_unlocked");
+    flag_set("staff_lightning_zm_upgrade_unlocked");
 
     // fn = getfunction("maps/mp/zm_tomb_quest_crypt", "chamber_disc_gem_has_clearance");
     // replacefunc(fn, ::yes);
     // gems = getentarray("crypt_gem", "script_noteworthy");
     // foreach (gem in gems)
     // {
-    //     gem_model = puzzle_orb_chamber_to_crypt(str_orb_path, gem)
+    //     DEBUG(sstr(gem.script_flag));
+    //     switch (gem.targetname)
+    //     {
+    //         case "crypt_gem_elec":
+    //             gem_model = maps\mp\zm_tomb_utility::puzzle_orb_chamber_to_crypt("lightning_orb_exit_path", gem);
+    //             gem_model setcandamage(1);
+    //             gem_model notify("damage", 1, gethostplayer(), undefined, undefined, undefined, undefined, undefined, undefined, "staff_lightning_zm");
+    //             break;
+    //         case "crypt_gem_ice":
+    //             gem_model = maps\mp\zm_tomb_utility::puzzle_orb_chamber_to_crypt("lightningice_orb_exit_path_orb_exit_path", gem);
+    //             gem_model setcandamage(1);
+    //             gem_model notify("damage", 1, gethostplayer(), undefined, undefined, undefined, undefined, undefined, undefined, "staff_water_zm");
+    //             break;
+    //         case "crypt_gem_air":
+    //             gem_model = maps\mp\zm_tomb_utility::puzzle_orb_chamber_to_crypt("air_orb_exit_path", gem);
+    //             gem_model setcandamage(1);
+    //             gem_model notify("damage", 1, gethostplayer(), undefined, undefined, undefined, undefined, undefined, undefined, "staff_air_zm");
+    //             break;
+    //         case "crypt_gem_fire":
+    //             gem_model = maps\mp\zm_tomb_utility::puzzle_orb_chamber_to_crypt("fire_orb_exit_path", gem);
+    //             gem_model setcandamage(1);
+    //             gem_model notify("damage", 1, gethostplayer(), undefined, undefined, undefined, undefined, undefined, undefined, "staff_air_zm");
+    //             break;
+    //     }
+    //     wait 1;
     // }
 
     // wait_network_frame();
@@ -1561,12 +1589,12 @@ build_tomb_staffs()
     // flag_wait("staff_fire_zm_upgrade_unlocked");
     // flag_wait("staff_lightning_zm_upgrade_unlocked");
 
-    // wait_network_frame();
-    // foreach (staff in level.a_elemental_staffs)
-    // {
-    //     staff.charger.charges_received = 20;
-    //     self.charger.is_inserted = true;
-    // }
+    wait_network_frame();
+    foreach (staff in level.a_elemental_staffs)
+    {
+        staff.charger.charges_received = 20;
+        self.charger.is_inserted = true;
+    }
 }
 
 _queue_staff_gem(piecespawn)
