@@ -1,3 +1,18 @@
+# Beta 0.27
+
+- Feat: Disable zombie blood on round 7 in solo games
+- Feat: Disable nuke drops on round 12
+- Feat: Add drone recall on round 27
+- Feat: Drone recall is now instant
+- Feat: Second round 18 reward is no longer restricted by purchase limit
+- Feat: Remove wind tunnel part location for lightning disk
+- Feat: Master disk can only spawn in the middle
+- Fix: Fixed inaccurate decimals in final time
+- Fix: Zone protection rounds hud not showing in a few specific cases
+- Fix: Multiple drone glitch
+- Fix: Shield hits void round 18 challenge
+- Fix: Missing melee weapon when snapshot restores loadout while staffs are disabled
+
 # Beta 0.26
 
 - Feat: Failing powerup is now cleaned up on round 27 for visual consistency

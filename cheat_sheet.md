@@ -83,7 +83,9 @@ Set rounds: 8, 12, 16, 20, 24, 28, 30
 | :---: | :--- |
 | 2 | Nukes are disabled |
 | 4 | First drop is double points (coop only) |
+| 7 | Zombie blood is disabled (solo only) |
 | 9 | Nukes are disabled |
+| 12 | Nukes are disabled |
 | 15 | Nukes are disabled |
 | 19 | Nukes are disabled |
 | 23 | First drop is max ammo |
@@ -93,7 +95,7 @@ Set rounds: 8, 12, 16, 20, 24, 28, 30
 
 ## Maxis drone
 
-On following rounds, maxis drone will be recalled at the beginning of the round, to prevent it from attacking zombies: 2, 9, 19, 24, 29
+On following rounds, maxis drone will be recalled at the beginning of the round, to prevent it from attacking zombies: 2, 9, 19, 24, 27, 29
 
 ## Digs
 
@@ -102,6 +104,8 @@ On following rounds, maxis drone will be recalled at the beginning of the round,
 
 ## Craftables
 
+- Master disk can only spawn on the middle location
+- Lightning disk cannot spawn in the wind tunnel
 - On round 29, all craftables are disabled (they cannot be picked up or built). Everything except for staffs can be picked up and build once round 29 is complete.
 
 # Challenge details
