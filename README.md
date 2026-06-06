@@ -36,8 +36,8 @@ At some point this mod will get it's own leaderboards, for now, i'll put best re
 
 | Time | Players | Version | Ft flags |
 | :---: | :--- | :---: | :---: |
+| [38:19.45](https://www.twitch.tv/videos/2789359759) | Tima | 0.27 | 166136 3844 |
 | [38.22.85](https://youtu.be/3L87XfJZPbM) | DankSlushie | 0.26 | 248 4 |
-| [38:51.85](https://www.twitch.tv/videos/2784313602) | Tima | 0.26 | 248 4 |
 
 ## 2p completions
 
