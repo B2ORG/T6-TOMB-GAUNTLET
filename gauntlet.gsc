@@ -912,7 +912,7 @@ snapshot_restore(remove_quickrevive, go_back_a_round)
         b2_flag_clear(FLAG_BOB_KILL_DRONE);
     }
 
-    level.round_hud settext("0:00");
+    level.round_hud set_text_safe("0:00");
     reset_vars();
     terminate_drone(false);
     zombie_goto_round(level.round_number);
@@ -6965,7 +6965,7 @@ gauntlet_hud()
     level.round_hud setpoint("TOPRIGHT", "TOPRIGHT", 0, 15);
     level.round_hud.alpha = 1;
     level.round_hud.color = (0.6, 0.75, 1);
-    level.round_hud settext("0:00");
+    level.round_hud set_text_safe("0:00");
 
     counter_hud = createserverfontstring("default" , 1.4);
     counter_hud setpoint("CENTER", "CENTER", 0, 185);
@@ -7010,7 +7010,7 @@ gauntlet_hud()
             {
                 player.gauntlet_zone_hud.alpha = 0.9;
                 z = player zone_friendly_name();
-                player.gauntlet_zone_hud settext(z);
+                player.gauntlet_zone_hud set_text_safe(z);
             }
             else
             {
@@ -7082,14 +7082,14 @@ custom_win_screen()
     win_hud = createserverfontstring("default" , 2.4);
     win_hud setpoint("CENTER", "CENTER", 0, -50);
     win_hud.alpha = 0;
-    win_hud settext("You Win!");
+    win_hud set_text_safe("You Win!");
     win_hud fadeovertime(1);
     win_hud.alpha = 1;
 
     win_hud2 = createserverfontstring("default" , 2.2);
     win_hud2 setpoint("CENTER", "CENTER", 0, -25);
     win_hud2.alpha = 0;
-    win_hud2 settext("TIME: " + convert_time(end_time - level.gauntlet_game_start, TIME_MMSSVV)); 
+    win_hud2 set_text_safe("TIME: " + convert_time(end_time - level.gauntlet_game_start, TIME_MMSSVV));
     win_hud2 fadeovertime(1);
     win_hud2.alpha = 1;
 
@@ -7104,7 +7104,7 @@ custom_win_screen()
     win_hud3 setpoint("CENTER", "CENTER", 0, 0);
     win_hud3.alpha = 0;
     win_hud3.color = (0.75, 0.75, 0.75);
-    win_hud3 settext(features); 
+    win_hud3 set_text_safe(features);
     win_hud3 fadeovertime(1);
     win_hud3.alpha = 1;
 }
@@ -7115,7 +7115,7 @@ custom_lose_screen()
     win_hud = createserverfontstring("default" , 2.4);
     win_hud setpoint("CENTER", "CENTER", 0, -50);
     win_hud.alpha = 0;
-    win_hud settext("GAUNTLET LOST");
+    win_hud set_text_safe("GAUNTLET LOST");
     win_hud fadeovertime(1);
     win_hud.alpha = 1;
 }
@@ -7129,11 +7129,7 @@ second_chance_hud(team_size)
     chance_hud setpoint("CENTER", "CENTER", 0, -10);
     chance_hud.alpha = 0;
     chance_hud.color = (1, 0.8, 0.6);
-    chance_hud settext("SECOND CHANCE"); 
-    if (team_size == 1)
-    {
-        chance_hud settext("CHALLENGE FAILED"); 
-    }
+    chance_hud set_text_safe(team_size == 1 ? "CHALLENGE FAILED" : "SECOND CHANCE");
 
     chance_hud fadeovertime(1);
     chance_hud.alpha = 1;
@@ -7239,7 +7235,7 @@ set_title_hud_property(instruction, data)
             level.gauntlet_challenge_title setvalue(data);
             break;
         case GAUNTLET_HUD_SET_TEXT:
-            level.gauntlet_challenge_title settext(data);
+            level.gauntlet_challenge_title set_text_safe(data);
             break;
         case GAUNTLET_HUD_SET_COLOR:
             level.gauntlet_challenge_title.color = data;
@@ -7279,7 +7275,6 @@ set_status_hud_property(instruction, data)
                 break;
             case GAUNTLET_HUD_SET_TEXT:
                 player.gauntlet_challenge_player_status set_text_safe(data);
-                    player.gauntlet_challenge_player_status settext(data);
                 break;
             case GAUNTLET_HUD_SET_COLOR:
                 player.gauntlet_challenge_player_status.color = data;
@@ -7319,7 +7314,7 @@ set_zone_hud_property(instruction, data)
                 player.gauntlet_zone_hud setvalue(data);
                 break;
             case GAUNTLET_HUD_SET_TEXT:
-                player.gauntlet_zone_hud settext(data);
+                player.gauntlet_zone_hud set_text_safe(data);
                 break;
             case GAUNTLET_HUD_SET_COLOR:
                 player.gauntlet_zone_hud.color = data;
@@ -7344,8 +7339,13 @@ stop_round_timer_hud()
     TRACE("stop_round_timer_hud");
     timer_text = convert_time(gettime() - level.gauntlet_game_start, TIME_MSSVV);
     split_text = convert_time(gettime() - level.round_start_time, TIME_MSSVV);
-    level.round_hud settext(strtok(split_text, ".")[0]);
+    level.round_hud set_text_safe(strtok(split_text, ".")[0]);
     // say("Game: " + timer_text + " | Round: " + split_text);
+}
+
+set_text_safe(text)
+{
+    self settextunlimited(sstr(text));
 }
 
 _cleanup_dev_hud()
