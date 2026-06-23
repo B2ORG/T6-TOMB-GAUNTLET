@@ -4000,6 +4000,15 @@ chat_listener()
             level notify("end_of_round");
 #endif
         }
+        else if (message == "addzombies")
+        {
+#ifdef ENABLE_DEBUG
+            if (isdefined(level.zombie_total) && level.zombie_total > 0)
+            {
+                level.zombie_total += 24;
+            }
+#endif
+        }
         else if (message == "hudcenter")
         {
             player set_status_hud_property(GAUNTLET_HUD_SET_POINT, array("CENTER", "TOPRCENTERIGHT", 0, 24));
