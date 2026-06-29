@@ -126,6 +126,11 @@ main()
         ::gauntlet_waittill_dug
     );
     replace_func_safe(
+        "maps/mp/zm_tomb_teleporter",
+        "stargate_teleport_think",
+        ::gauntlet_stargate_teleport_think
+    );
+    replace_func_safe(
         "maps/mp/zm_tomb_utility",
         "zombie_gib_guts",
         ::gauntlet_zombie_gib_guts
@@ -932,8 +937,6 @@ snapshot_restore(remove_quickrevive, go_back_a_round)
         thread maps\mp\zm_tomb_ee_side::tablet_cleanliness_chastise(player);
     }
 
-    thread snapshot_restore_stargate(level.gauntlet_round_snapshot["stargate"]);
-
     maps\mp\zombies\_zm::round_over();
     level notify("between_round_over");
     thread maps\mp\zombies\_zm::round_think(true);
@@ -1022,24 +1025,6 @@ snapshot_restore_perks(perk_snap, remove_quickrevive)
     }
 }
 
-snapshot_restore_stargate(stargates)
-{
-    TRACE("snapshot_restore_stargate " + sstr(stargates));
-    for (i = 1; i < 5; i++)
-    {
-        maps\mp\zm_tomb_teleporter::stargate_teleport_disable(i);
-    }
-    wait 1;
-
-    foreach (idx, state in stargates)
-    {
-        if (is_true(state))
-        {
-            maps\mp\zm_tomb_teleporter::stargate_teleport_enable(idx);
-        }
-    }
-}
-
 _snapshot_restore_gun_special(weapondata)
 {
     TRACE(sstr(self) + " _snapshot_restore_gun_special " + sstr(weapondata));
@@ -1114,12 +1099,6 @@ take_round_snapshot()
 
         snapshot[STR(player.entity_num)] = s;
     }
-
-    snapshot["stargate"] = [];
-    snapshot["stargate"]["1"] = flag_exists("enable_teleporter_1") && flag("enable_teleporter_1");
-    snapshot["stargate"]["2"] = flag_exists("enable_teleporter_2") && flag("enable_teleporter_2");
-    snapshot["stargate"]["3"] = flag_exists("enable_teleporter_3") && flag("enable_teleporter_3");
-    snapshot["stargate"]["4"] = flag_exists("enable_teleporter_4") && flag("enable_teleporter_4");
 
     level.gauntlet_round_snapshot = snapshot;
 }
@@ -2678,6 +2657,30 @@ should_show_r2l_bar()
     return false;
 }
 
+gauntlet_stargate_teleport_think()
+{
+    TRACE("gauntlet_stargate_teleport_think");
+    self endon("death");
+    level endon("disable_teleporter_" + self.script_int);
+
+    while (true)
+    {
+        self.trigger_stub waittill("trigger", e_player);
+        if (b2_flag(FLAG_STARGATES_DISABLED))
+        {
+            continue;
+        }
+
+        if (e_player getstance() != "prone" && !is_true(e_player.teleporting))
+        {
+            playfx(level._effect["teleport_3p"], self.origin, (1, 0, 0), (0, 0, 1));
+            playsoundatposition("zmb_teleporter_tele_3d", self.origin);
+            level notify("player_teleported", e_player, self.script_int);
+            level thread maps\mp\zm_tomb_teleporter::stargate_teleport_player(self.target, e_player);
+        }
+    }
+}
+
 gauntlet_reward_double_tap(player, s_stat)
 {
     TRACE(sstr(self.script_noteworthy) + " gauntlet_reward_double_tap " + sstr(player) + " " + sstr(s_stat));
@@ -2830,37 +2833,60 @@ guard_crazy_place()
     level endon("end_of_round");
     register_on_gauntlet_end_of_this_round(::unguard_crazy_place);
 
-    for (i = 1; i < 5; i++)
-    {
-        maps\mp\zm_tomb_teleporter::stargate_teleport_disable(i);
-    }
-
+    b2_flag_set(FLAG_STARGATES_DISABLED);
+    guarding_since = gettime();
     wait_network_frame();
 
-    foreach (player in get_alive_players())
+    do
     {
-        if (maps\mp\zm_tomb_chamber::is_point_in_chamber(player.origin))
+        teleports_out = [];
+        a_exits = getstructarray("portal_exit", "script_noteworthy");
+        foreach (player in get_alive_players())
         {
-            teleport_target = array(TELEPORT_WIND_OUT, TELEPORT_FIRE_OUT, TELEPORT_ELECTRIC_OUT, TELEPORT_ICE_OUT)[randomint(4)];
-            stargate_teleport_player(teleport_target, player);
+            if (!maps\mp\zm_tomb_chamber::is_point_in_chamber(player.origin))
+            {
+                continue;
+            }
+            closest = undefined;
+            teleports_out[player.entity_num] = undefined;
+
+            foreach (teleporter in a_exits)
+            {
+                if (!isdefined(teleporter.target))
+                {
+                    continue;
+                }
+                distance = distancesquared(player.origin, teleporter.origin);
+                // DEBUG("teleporter.target:" + sstr(teleporter.target) + " distance:" + sstr(distance));
+                if (!isdefined(closest) || closest > distance)
+                {
+                    teleports_out[player.entity_num] = teleporter;
+                    closest = distance;
+                }
+            }
         }
-    }
 
-    wait 2;
+        DEBUG("clearing crazy place of " + teleports_out.size + " players");
 
-    while (true)
-    {
-        a_players = get_alive_players();
-        foreach (player in a_players)
+        if (gettime() < guarding_since + 12100)
         {
-            if (maps\mp\zm_tomb_chamber::is_point_in_chamber(player.origin))
+            foreach (ent_num, teleporter_to_use in teleports_out)
+            {
+                DEBUG("teleporting " + sstr(ent_num) + " through " + sstr(teleporter_to_use.target));
+                level thread maps\mp\zm_tomb_teleporter::stargate_teleport_player(teleporter_to_use.target, get_player_by_ent_num(ent_num));
+            }
+        }
+        else
+        {
+            foreach (player in get_alive_players())
             {
                 player instakill_player();
             }
         }
 
-        wait 0.5;
+        wait 4;
     }
+    while (maps\mp\zm_tomb_chamber::is_chamber_occupied());
 }
 
 unguard_crazy_place()
@@ -2876,11 +2902,7 @@ unguard_crazy_place()
             maps\mp\zm_tomb_teleporter::stargate_teleport_enable(i);
         }
     }
-    else
-    {
-        // fixme
-        snapshot_restore_stargate(level.gauntlet_round_snapshot["stargate"]);
-    }
+    b2_flag_clear(FLAG_STARGATES_DISABLED);
 }
 
 force_next_drop(drop)
