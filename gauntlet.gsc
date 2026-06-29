@@ -1,37 +1,16 @@
 #include common_scripts\utility;
 #include maps\mp\_utility;
-#include maps\mp\animscripts\zm_utility;
-#include maps\mp\gametypes_zm\_globallogic_score;
 #include maps\mp\gametypes_zm\_hud_util;
-#include maps\mp\gametypes_zm\_shellshock;
-#include maps\mp\gametypes_zm\_tweakables;
-#include maps\mp\gametypes_zm\_weapons;
-#include maps\mp\zombies\_weapons;
-#include maps\mp\zombies\_zm_game_module;
-#include maps\mp\zombies\_zm_net;
-#include maps\mp\zombies\_zm_ai_mechz;
 #include maps\mp\zombies\_zm_perks;
-#include maps\mp\zombies\_zm_perk_random;
-#include maps\mp\zombies\_zm_laststand;
-#include maps\mp\zombies\_zm_magicbox;
-#include maps\mp\zombies\_zm_powerups;
-#include maps\mp\zombies\_zm_equipment;
-#include maps\mp\zombies\_zm_melee_weapon;
-#include maps\mp\zombies\_zm_score;
-#include maps\mp\zombies\_zm_spawner;
-#include maps\mp\zombies\_zm_stats;
 #include maps\mp\zombies\_zm_utility;
-#include maps\mp\zombies\_zm_weapons;
 #include maps\mp\zombies\_zm;
 #include maps\mp\zm_tomb;
-#include maps\mp\zm_tomb_utility;
-#include maps\mp\zm_tomb_capture_zones;
-#include maps\mp\zm_tomb_craftables;
-#include maps\mp\zm_tomb_tank;
 #include maps\mp\zm_tomb_dig;
 
 #inline gauntlet;
 
+// TODO NML door crash on 6 is canon
+// TODO add extra logs to know what failed exactly
 main()
 {
     replace_func_safe(
@@ -896,7 +875,7 @@ snapshot_restore(remove_quickrevive, go_back_a_round)
         player setclientfield("score_cf_double_points_active", 0);
         player notify("insta_kill_over");
 
-        player equipment_take();
+        player maps\mp\zombies\_zm_equipment::equipment_take();
         player takeallweapons();
         foreach (active_perk in player.perks_active)
         {
@@ -1889,7 +1868,7 @@ powerup_round_duration(powerup)
 _no_damage_player_callback(einflictor, eattacker, idamage, idflags, smeansofdeath, sweapon, vpoint, vdir, shitloc, psoffsettime)
 {
     TRACE(sstr(self) + " _no_damage_player_callback " + sstr(einflictor) + " " + sstr(eattacker) + " " + sstr(idamage) + " " + sstr(idflags) + " " + sstr(smeansofdeath) + " " + sstr(sweapon) + " " + sstr(vpoint) + " " + sstr(vdir) + " " + sstr(shitloc) + " " + sstr(psoffsettime));
-    if (!b2_flag(P_FLAG_NOT_PLAYING, self) && is_true(eattacker.is_zombie) && idamage > 0)
+    if (!b2_flag(P_FLAG_NOT_PLAYING, self) && eattacker maps\mp\animscripts\zm_utility::is_zombie() && idamage > 0)
     {
         b2_flag_clear(FLAG_DMG_CHALLENGE);
         b2_flag_set(P_FLAG_DMG_CHALLENGE_FAIL, self);
@@ -1903,7 +1882,7 @@ mauser_reward(origin, angles)
     options = level.players[0] maps\mp\zombies\_zm_weapons::get_pack_a_punch_weapon_options(weapon);
     model = spawn_weapon_model(weapon, undefined, origin, angles, options);
     playfxontag(level._effect["special_glow"], model, "tag_origin");
-    trig = tomb_spawn_trigger_radius(origin, 40, 1);
+    trig = maps\mp\zm_tomb_utility::tomb_spawn_trigger_radius(origin, 40, 1);
     trig.require_look_at = 1;
     trig.hint_string = &"PLATFORM_PICKUPNEWWEAPON";
 
@@ -1912,7 +1891,7 @@ mauser_reward(origin, angles)
         trig waittill("trigger", player);
     }
 
-    trig tomb_unitrigger_delete();
+    trig maps\mp\zm_tomb_utility::tomb_unitrigger_delete();
     model delete();
 }
 
@@ -1969,7 +1948,7 @@ double_tap_reward(origin, angles)
     TRACE("double_tap_reward " + sstr(origin) + " " + sstr(angles));
     model = spawn_weapon_model("zombie_perk_bottle_doubletap", undefined, origin, angles);
     playfxontag(level._effect["special_glow"], model, "tag_origin");
-    trig = tomb_spawn_trigger_radius(origin, 40, 1);
+    trig = maps\mp\zm_tomb_utility::tomb_spawn_trigger_radius(origin, 40, 1);
     trig.require_look_at = 1;
     trig.hint_string = "Pick up Double Tap";
 
@@ -1978,7 +1957,7 @@ double_tap_reward(origin, angles)
         trig waittill("trigger", player);
     }
 
-    trig tomb_unitrigger_delete();
+    trig maps\mp\zm_tomb_utility::tomb_unitrigger_delete();
     model delete();
 }
 
@@ -2989,12 +2968,12 @@ terminate_staffs()
         }
     }
 
-    clear_player_staff("staff_air_zm");
-    clear_player_staff("staff_fire_zm");
-    clear_player_staff("staff_lightning_zm");
-    clear_player_staff("staff_water_zm");
+    maps\mp\zm_tomb_craftables::clear_player_staff("staff_air_zm");
+    maps\mp\zm_tomb_craftables::clear_player_staff("staff_fire_zm");
+    maps\mp\zm_tomb_craftables::clear_player_staff("staff_lightning_zm");
+    maps\mp\zm_tomb_craftables::clear_player_staff("staff_water_zm");
 
-    hide_staff_model();
+    maps\mp\zm_tomb_craftables::hide_staff_model();
     b2_flag_set(FLAG_STAFFS_DISABLED);
 
     // TODO disable trigger at some point
@@ -3683,7 +3662,7 @@ sstr(value)
                 return "<player:" + sstr(value.name) + "(" + sstr(value.entity_num) + ")>";
             if (eq(value.classname, "script_vehicle") || isvehicle(value))
                 return "<vehicle:" + sstr(value.model) + ">";
-            if (value is_zombie())
+            if (value maps\mp\animscripts\zm_utility::is_zombie())
                 return "<zombie:" + sstr(value.model) + ">";
             if (eq(value, level))
                 return "<level:" + sstr(level.script) + ">";
@@ -5275,7 +5254,7 @@ _watch_player_velocity_thread()
                 case 1:
                     if (self.score > 50)
                     {
-                        penalty = roundtonearestfive(max_int(30, self.score / 25));
+                        penalty = maps\mp\gametypes_zm\_globallogic_score::roundtonearestfive(max_int(30, self.score / 25));
                         assert(isint(penalty));
                         self minus_to_player_score(penalty);
                         // DEBUG("Movement penalty for " + sstr(self) + " POINTS: " + sstr(penalty));
@@ -6188,7 +6167,7 @@ gauntlet_mechz_round_tracker()
 
         if (level.mechz_left_to_spawn == 0 && level.next_mechz_round == level.gauntlet_round)
         {
-            mechz_health_increases();
+            maps\mp\zombies\_zm_ai_mechz::mechz_health_increases();
 
             level.mechz_zombie_per_round = 3;
             if (isdefined(level.gauntlet_override_mechz_per_round))
@@ -6216,7 +6195,7 @@ gauntlet_mechz_round_tracker()
 
         maps\mp\zombies\_zm_ai_mechz_ffotd::mechz_round_tracker_loop_end();
         level waittill("between_round_over");
-        mechz_clear_spawns();
+        maps\mp\zombies\_zm_ai_mechz::mechz_clear_spawns();
         level.mechz_left_to_spawn = 0;
     }
 }
@@ -6258,16 +6237,16 @@ mechz_spawner()
         }
 
         ai = spawn_zombie(level.mechz_spawners[0]);
-        ai thread mechz_spawn();
+        ai thread maps\mp\zombies\_zm_ai_mechz::mechz_spawn();
         level.num_mechz_spawned++;
         level.mechz_left_to_spawn--;
 
         if (level.mechz_left_to_spawn == 0)
         {
-            level thread response_to_air_raid_siren_vo();
+            level thread maps\mp\zombies\_zm_ai_mechz::response_to_air_raid_siren_vo();
         }
 
-        ai thread mechz_hint_vo();
+        ai thread maps\mp\zombies\_zm_ai_mechz::mechz_hint_vo();
         wait(randomfloatrange(3.0, 6.0));
     }
 }
