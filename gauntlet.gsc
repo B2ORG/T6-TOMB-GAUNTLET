@@ -7083,7 +7083,7 @@ player_gauntlet_hud()
     self.gauntlet_challenge_player_status.color = (1, 0.7, 0.4);
 
     self.gauntlet_timer_player_status = self createfontstring("default", 1.9);
-    self.gauntlet_timer_player_status setpoint("TOPRIGHT", "TOPRIGHT", 0, 90);
+    self.gauntlet_timer_player_status setpoint("LEFT", "TOPRIGHT", -60, 100);
     self.gauntlet_timer_player_status.alpha = 0;
     self.gauntlet_timer_player_status.color = (1, 0.7, 0.4);
 
