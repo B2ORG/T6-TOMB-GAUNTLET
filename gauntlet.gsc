@@ -34,145 +34,107 @@
 
 main()
 {
-    fn = getfunction("maps/mp/zombies/_zm_ai_mechz", "mechz_round_tracker");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc mechz_round_tracker");
-        replacefunc(fn, ::gauntlet_mechz_round_tracker);
-    }
+    replace_func_safe(
+        "maps/mp/zombies/_zm",
+        "player_out_of_playable_area_monitor",
+        ::gauntlet_player_out_of_playable_area_monitor
+    );
+    replace_func_safe(
+        "maps/mp/zombies/_zm_ai_mechz",
+        "mechz_round_tracker",
+        ::gauntlet_mechz_round_tracker
+    );
+    replace_func_safe(
+        "maps/mp/zombies/_zm_perk_electric_cherry",
+        "electric_cherry_laststand",
+        ::gauntlet_electric_cherry_laststand
+    );
+    replace_func_safe(
+        "maps/mp/zombies/_zm_powerups",
+        "check_for_instakill",
+        ::gauntlet_check_for_instakill
+    );
+    replace_func_safe(
+        "maps/mp/zombies/_zm_powerups",
+        "powerup_drop",
+        ::gauntlet_powerup_drop
+    );
+    replace_func_safe(
+        "maps/mp/zombies/_zm_weap_staff_lightning",
+        "staff_lightning_death_event",
+        ::gauntlet_staff_lightning_death_event
+    );
+    replace_func_safe(
+        "maps/mp/zombies/_zm_zonemgr",
+        "manage_zones",
+        ::gauntlet_manage_zones
+    );
 
-    fn = getfunction("maps/mp/zombies/_zm_powerups", "powerup_drop");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc powerup_drop");
-        replacefunc(fn, ::gauntlet_powerup_drop);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_dig", "waittill_dug");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc waittill_dug");
-        replacefunc(fn, ::gauntlet_waittill_dug);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_capture_zones", "recapture_round_tracker");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc recapture_round_tracker");
-        replacefunc(fn, ::gauntlet_recapture_round_tracker);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_capture_zones", "delete_zombie_for_capture_event");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc delete_zombie_for_capture_event");
-        replacefunc(fn, ::gauntlet_delete_zombie_for_capture_event);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_capture_zones", "drop_max_ammo_at_death_location");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc drop_max_ammo_at_death_location");
-        replacefunc(fn, ::gauntlet_drop_max_ammo_at_death_location);
-    }
-
-    fn = getfunction("maps/mp/zombies/_zm_zonemgr", "manage_zones");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc manage_zones");
-        replacefunc(fn, ::gauntlet_manage_zones);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_utility", "zombie_gib_all");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc zombie_gib_all");
-        replacefunc(fn, ::gauntlet_zombie_gib_all);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_utility", "zombie_gib_guts");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc zombie_gib_guts");
-        replacefunc(fn, ::gauntlet_zombie_gib_guts);
-    }
-
-    fn = getfunction("maps/mp/zombies/_zm_perk_electric_cherry", "electric_cherry_laststand");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc electric_cherry_laststand");
-        replacefunc(fn, ::gauntlet_electric_cherry_laststand);
-    }
-
-    fn = getfunction("maps/mp/zombies/_zm_powerups", "check_for_instakill");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc check_for_instakill");
-        replacefunc(fn, ::gauntlet_check_for_instakill);
-    }
-
-    fn = getfunction("maps/mp/zombies/_zm_weap_staff_lightning", "staff_lightning_death_event");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc staff_lightning_death_event");
-        replacefunc(fn, ::gauntlet_staff_lightning_death_event);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_capture_zones", "get_recapture_zone");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc get_recapture_zone");
-        replacefunc(fn, ::player_aware_get_recapture_zone);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_challenges", "reward_packed_weapon");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc reward_packed_weapon");
-        replacefunc(fn, ::gauntlet_reward_packed_weapon);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_dig", "dig_spots_respawn");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc dig_spots_respawn");
-        replacefunc(fn, ::gauntlet_dig_spots_respawn);
-    }
-
-    fn = getfunction("maps/mp/zombies/_zm", "player_out_of_playable_area_monitor");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc player_out_of_playable_area_monitor");
-        replacefunc(fn, ::gauntlet_player_out_of_playable_area_monitor);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_challenges", "reward_double_tap");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc reward_double_tap");
-        replacefunc(fn, ::gauntlet_reward_double_tap);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_craftables", "randomize_craftable_spawns");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc randomize_craftable_spawns");
-        replacefunc(fn, ::gauntlet_randomize_craftable_spawns);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_craftables", "quadrotor_set_available");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc quadrotor_set_available");
-        replacefunc(fn, ::gauntlet_quadrotor_set_available);
-    }
-
-    fn = getfunction("maps/mp/zm_tomb_craftables", "tomb_custom_craftable_validation");
-    if (isdefined(fn))
-    {
-        DEBUG("replacefunc tomb_custom_craftable_validation");
-        replacefunc(fn, ::gauntlet_tomb_custom_craftable_validation);
-    }
+    replace_func_safe(
+        "maps/mp/zm_tomb_capture_zones",
+        "delete_zombie_for_capture_event",
+        ::gauntlet_delete_zombie_for_capture_event
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_capture_zones",
+        "drop_max_ammo_at_death_location",
+        ::gauntlet_drop_max_ammo_at_death_location
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_capture_zones",
+        "get_recapture_zone",
+        ::player_aware_get_recapture_zone
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_capture_zones",
+        "recapture_round_tracker",
+        ::gauntlet_recapture_round_tracker
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_challenges",
+        "reward_double_tap",
+        ::gauntlet_reward_double_tap
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_challenges",
+        "reward_packed_weapon",
+        ::gauntlet_reward_packed_weapon
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_craftables",
+        "quadrotor_set_available",
+        ::gauntlet_quadrotor_set_available
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_craftables",
+        "randomize_craftable_spawns",
+        ::gauntlet_randomize_craftable_spawns
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_craftables",
+        "tomb_custom_craftable_validation",
+        ::gauntlet_tomb_custom_craftable_validation
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_dig",
+        "dig_spots_respawn",
+        ::gauntlet_dig_spots_respawn
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_dig",
+        "waittill_dug",
+        ::gauntlet_waittill_dug
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_utility",
+        "zombie_gib_guts",
+        ::gauntlet_zombie_gib_guts
+    );
+    replace_func_safe(
+        "maps/mp/zm_tomb_utility",
+        "zombie_gib_all",
+        ::gauntlet_zombie_gib_all
+    );
 }
 
 init()
@@ -631,6 +593,36 @@ set_status(status, new_hud_value, new_hud_color)
                 player set_status_hud_property(GAUNTLET_HUD_SET_COLOR, new_hud_color);
             }
         }
+    }
+}
+
+replace_func_safe(file, func, replacement, priority = 0)
+{
+    TRACE("replace_func_safe " + sstr(file) + " " + sstr(func) + " " + sstr(replacement) + " " + sstr(priority));
+    fn = getfunction(file, func);
+    if (isdefined(fn))
+    {
+        DEBUG("replacefunc " + sstr(func));
+        replacefunc(fn, replacement, priority);
+    }
+    else
+    {
+        WARN("could not replace " + sstr(file) + "::" + sstr(func));
+    }
+}
+
+remove_detour_safe(file, func)
+{
+    TRACE("remove_detour_safe " + sstr(file) + " " + sstr(func));
+    fn = getfunction(file, func);
+    if (isdefined(getdetour(fn)))
+    {
+        DEBUG("removedetour " + sstr(func));
+        removedetour(fn);
+    }
+    else
+    {
+        WARN("no detour for " + sstr(file) + "::" + sstr(func));
     }
 }
 
@@ -1151,8 +1143,7 @@ freeze_round_zombie_count()
 
     current_zombies_in_the_round = get_round_count();
     level.gauntlet_zombie_spawn_callback_logic = ::set_no_points_and_powerups;
-    fn = getfunction("maps/mp/zombies/_zm_weap_staff_lightning", "staff_lightning_kill_zombie");
-    replacefunc(fn, ::_staff_lighting_kill_zombie_no_points);
+    replace_func_safe("maps/mp/zombies/_zm_weap_staff_lightning", "staff_lightning_kill_zombie", ::_staff_lighting_kill_zombie_no_points);
     foreach (zombie in get_round_enemy_array())
     {
         zombie set_no_points_and_powerups();
@@ -1171,8 +1162,7 @@ unfreeze_round_zombie_count()
     waittillframeend;
 
     level.gauntlet_zombie_spawn_callback_logic = undefined;
-    fn = getfunction("maps/mp/zombies/_zm_weap_staff_lightning", "staff_lightning_kill_zombie");
-    removedetour(fn);
+    remove_detour_safe("maps/mp/zombies/_zm_weap_staff_lightning", "staff_lightning_kill_zombie");
     foreach (zombie in get_round_enemy_array())
     {
         zombie unset_no_points_and_powerups();
@@ -2945,11 +2935,7 @@ set_gauntlet_starting_points()
 terminate_staffs()
 {
     TRACE("terminate_staffs");
-    fn = getfunction("maps/mp/zm_tomb_main_quest", "can_pickup_staff");
-    if (isdefined(fn))
-    {
-        replacefunc(fn, ::no);
-    }
+    replace_func_safe("maps/mp/zm_tomb_main_quest", "can_pickup_staff", ::no);
 
     wait 0.05;
 
@@ -3819,10 +3805,9 @@ disable_lighting_staff_income_for_a_round()
 {
     TRACE("disable_lighting_staff_income_for_a_round");
     level endon("end_game");
-    fn = getfunction("maps/mp/zombies/_zm_weap_staff_lightning", "staff_lightning_kill_zombie");
-    replacefunc(fn, ::_staff_lighting_kill_zombie_no_points);
+    replace_func_safe("maps/mp/zombies/_zm_weap_staff_lightning", "staff_lightning_kill_zombie", ::_staff_lighting_kill_zombie_no_points);
     level waittill("end_of_round");
-    removedetour(fn);
+    remove_detour_safe("maps/mp/zombies/_zm_weap_staff_lightning", "staff_lightning_kill_zombie");
 }
 
 _staff_lighting_kill_zombie_no_points(player, str_weapon)
