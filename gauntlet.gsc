@@ -1349,6 +1349,19 @@ trigger_blocker(a1, a2, a3, a4, a5)
     self notify("trigger", a1, a2, a3, a4, a5);
 }
 
+get_unitrigger_by_origin(origin)
+{
+    TRACE("get_unitrigger_by_origin " + sstr(origin));
+    foreach (unitrigger in level._unitriggers.trigger_stubs)
+    {
+        if (unitrigger.origin == origin)
+        {
+            return unitrigger;
+        }
+    }
+    return undefined;
+}
+
 disable_nukes_for_a_round()
 {
     TRACE("disable_nukes_for_a_round");
@@ -8028,5 +8041,50 @@ _dev_handle_doors()
 {
     TRACE("_dev_handle_doors");
 #ifdef DEV_OPEN_DOORS
+    level endon("end_game");
+    setdvar("zombie_unlock_all", 1);
+    flag_wait("initial_blackscreen_passed");
+
+    level.b_open_all_gramophone_doors = true;
+
+    zombie_doors = getentarray("zombie_door", "targetname");
+    foreach (door in zombie_doors)
+    {
+        door notify("trigger", gethostplayer(), true);
+        wait 0.05;
+    }
+    zombie_debris = getentarray("zombie_debris", "targetname");
+    foreach (debris in zombie_debris)
+    {
+        debris notify("trigger", gethostplayer(), true);
+        wait 0.05;
+    }
+    flag_blockers = getentarray("flag_blocker", "targetname");
+    foreach (flag in flag_blockers)
+    {
+        if (isdefined(flag.script_flag_wait))
+        {
+            flag_set(flag.script_flag_wait);
+            wait 0.05;
+        }
+    }
+
+    level notify("open_sesame");
+    staff_chamber_doors = getentarray("chamber_entrance", "targetname");
+    foreach (chamber_doors_piece in staff_chamber_doors)
+    {
+        trigger_position = getstruct(chamber_doors_piece.targetname + "_position", "targetname");
+        trigger_position.has_vinyl = true;
+        wait 0.05;
+        trigger = get_unitrigger_by_origin(trigger_position.origin);
+        if (isdefined(trigger))
+        {
+            trigger notify("trigger", gethostplayer());
+        }
+        else
+        {
+            WARN("Chamber door piece " + sstr(chamber_doors_piece) + " does not have corresponding open unitrigger");
+        }
+    }
 #endif
 }

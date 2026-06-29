@@ -5,6 +5,7 @@
 // #define DEV_AWARD_TOMB_CHALLENGES
 // #define DEV_ACTIVATE_TOMB_GENS
 // #define DEV_BUILD_CRAFTABLES
+// #define DEV_OPEN_DOORS
 
 /* Inspection can cause ils, use only when needed */
 #define MUTE_INSPECT_DAMAGE
