@@ -470,6 +470,7 @@ gauntlet_main_loop()
                 thread wrap_gauntlet_round(::watch_tank_kills, _r28_tank_kills);
                 break;
             case 29:
+                register_on_gauntlet_start_of_this_round(::disable_claymore_triggers);
                 register_on_gauntlet_start_of_this_round(::terminate_staffs);
                 register_on_gauntlet_start_of_this_round(::disable_buildables_pickup_for_a_round);
                 register_on_gauntlet_start_of_this_round(::terminate_drone_for_a_round);
@@ -3016,6 +3017,38 @@ disable_buildables_pickup_for_a_round()
     level.gauntlet_custom_craftable_validation = ::no;
     level waittill("end_of_round");
     level.gauntlet_custom_craftable_validation = undefined;
+}
+
+disable_claymore_triggers()
+{
+    TRACE("disable_claymore_triggers");
+    level endon("end_game");
+    level endon("end_of_round");
+    register_on_gauntlet_end_of_this_round(::enable_claymore_triggers);
+    while (true)
+    {
+        foreach (player in level.players)
+        {
+            player notify("zmb_disable_claymore_prompt");
+        }
+
+        wait 0.1;
+    }
+}
+
+enable_claymore_triggers()
+{
+    TRACE("enable_claymore_triggers");
+    players = get_players();
+    foreach (player in players)
+    {
+        player notify("zmb_enable_claymore_prompt");
+    }
+    wait 0.25;
+    foreach (player in players)
+    {
+        player notify("zmb_enable_claymore_prompt");
+    }
 }
 
 dynamic_round()
