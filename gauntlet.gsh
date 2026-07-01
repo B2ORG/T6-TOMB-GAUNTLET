@@ -2,10 +2,10 @@
 // #define ENABLE_DEBUG
 
 // #define DEV_SET_EASTEREGGS
+// #define DEV_OPEN_DOORS
 // #define DEV_AWARD_TOMB_CHALLENGES
 // #define DEV_ACTIVATE_TOMB_GENS
 // #define DEV_BUILD_CRAFTABLES
-// #define DEV_OPEN_DOORS
 
 /* Inspection can cause ils, use only when needed */
 #define MUTE_INSPECT_DAMAGE
@@ -37,8 +37,8 @@
 #define STR(__val) "" + __val
 #define JSON_ENCODE_MAX_DEPTH 3
 
-#define GAUNTLET_VERSION "0.27"
-#define PLUTO_MINIMAL_VERSION 5316
+#define GAUNTLET_VERSION "0.28"
+#define PLUTO_MINIMAL_VERSION 5334
 #define GAUNTLET_ROUNDS 30
 #define MAX_STRING_LEN 8191
 #define WALLPOWER_TILL_ROUND 29

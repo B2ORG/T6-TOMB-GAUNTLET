@@ -158,7 +158,7 @@ While the generators are attacked, the round count is locked. The generators hav
 
 ## 16. Metal overdose
 
-Panzer limit is set to player count + 3, but no more than 7.
+Panzer limit is set to player count + 3, but no more than 7. Teleports are disabled throught the entire round.
 
 ## 18. Fast AF boiii
 

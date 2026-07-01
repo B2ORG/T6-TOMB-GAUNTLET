@@ -1,3 +1,12 @@
+# Beta 0.28
+
+- Feat: Disable ability to pick up Claymore on round 29
+- Fix: Removed teleport state from round snapshot due to confiusing behavior
+- Fix: Teleports are now properly closed and opened on round 16
+- Fix: Fixed mechanism managing player ejection from crazy place on round 16
+- Fix: Coop hud for tank progress is now consistent with solo
+- Fix: Countdown timer for location challenges moving irregularly
+
 # Beta 0.27
 
 - Feat: Disable zombie blood on round 7 in solo games
