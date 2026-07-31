@@ -6,6 +6,7 @@
 #include maps\mp\zombies\_zm;
 #include maps\mp\zm_tomb;
 #include maps\mp\zm_tomb_dig;
+#include maps\mp\zm_tomb_capture_zones;
 
 #inline gauntlet;
 
