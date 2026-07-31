@@ -470,7 +470,7 @@ gauntlet_main_loop()
     }
 }
 
-wrap_gauntlet_round(gauntlet_fn, a1, a2, a3)
+wrap_gauntlet_round(gauntlet_fn, a1 = undefined, a2 = undefined, a3 = undefined)
 {
     TRACE("wrap_gauntlet_round " + sstr(gauntlet_fn) + " " + sstr(a1) + " " + sstr(a2) + " " + sstr(a3));
     level endon("end_game");
@@ -530,7 +530,7 @@ wrap_gauntlet_callback(callback)
     [[callback]]();
 }
 
-set_status(status, new_hud_value, new_hud_color)
+set_status(status, new_hud_value = undefined, new_hud_color = undefined)
 {
     TRACE(sstr(self) + " set_status " + sstr(status) + " " + sstr(new_hud_value) + " " + sstr(new_hud_color));
     if (!isdefined(new_hud_color))
@@ -1172,7 +1172,7 @@ b2_player_state()
     level.b2_gauntlet_player_state[STR(self.entity_num)] = 0;
 }
 
-b2_flag(flag, player)
+b2_flag(flag, player = undefined)
 {
     TRACE("b2_flag " + sstr(flag) + " " + sstr(player));
     if (isdefined(player) && isplayer(player))
@@ -1182,7 +1182,7 @@ b2_flag(flag, player)
     return (level.b2_gauntlet_state & int(flag));
 }
 
-b2_flag_set(flag, player)
+b2_flag_set(flag, player = undefined)
 {
     TRACE("b2_flag_set " + sstr(flag) + " " + sstr(player));
     if (typeof(player) == "entity" && isplayer(player))
@@ -1195,7 +1195,7 @@ b2_flag_set(flag, player)
     }
 }
 
-b2_flag_clear(flag, player)
+b2_flag_clear(flag, player = undefined)
 {
     TRACE("b2_flag_clear " + sstr(flag) + " " + sstr(player));
     if (isdefined(player) && isplayer(player))
@@ -1222,7 +1222,7 @@ b2_flag_wait(flag, player)
     }
 }
 
-b2_flag_waitopen(flag, player)
+b2_flag_waitopen(flag, player = undefined)
 {
     TRACE("b2_flag_waitopen " + sstr(flag) + " " + sstr(player));
     if (typeof(player) == "entity" && isplayer(player))
@@ -1341,7 +1341,7 @@ enable_zombie_blood()
     arrayremovevalue(level.gauntlet_disabled_dig_powerups, "zombie_blood", false);
 }
 
-build_craftable(craftable, player)
+build_craftable(craftable, player = undefined)
 {
     TRACE("build_craftable " + sstr(craftable));
     player = isdefined(player) ? player : gethostplayer();
@@ -1365,7 +1365,7 @@ build_craftable(craftable, player)
     }
 }
 
-take_craftable(craftable, player)
+take_craftable(craftable, player = undefined)
 {
     TRACE("take_craftable " + sstr(craftable));
     player = isdefined(player) ? player : gethostplayer();
@@ -3455,7 +3455,7 @@ set_dig_override_7()
     level.gauntlet_dig_spots_respawn_override = 7;
 }
 
-goal_string(current = 0, target)
+goal_string(current = 0, target = undefined)
 {
     TRACE("goal_string " + sstr(current) + " " + sstr(target));
     if (!isdefined(target))
@@ -3616,7 +3616,7 @@ max_int(a, b)
     return int(max(a, b));
 }
 
-add_strings(a, b, c, d, e, f, g, h, i, j)
+add_strings(a, b = undefined, c = undefined, d = undefined, e = undefined, f = undefined, g = undefined, h = undefined, i = undefined, j = undefined)
 {
     concat = "";
     foreach (idx, candidate in array(a, b, c, d, e, f, g, h, i, j))
@@ -4087,8 +4087,8 @@ gauntlet_r2l_watcher()
 
             if (b2_flag(P_FLAG_SHOW_R2L, player))
             {
-                DEBUG("\t(" + gettime() + " - " + sstr(player._gauntlet_last_deathbarrier_tick) + ") / " + sstr(wait_time) + " = " + sstr(diff));
                 diff = (gettime() - player._gauntlet_last_deathbarrier_tick) / wait_time;
+                DEBUG("\t(" + gettime() + " - " + sstr(player._gauntlet_last_deathbarrier_tick) + ") / " + sstr(wait_time) + " = " + sstr(diff));
                 if (isdefined(player._gauntlet_r2l_hud))
                 {
                     player._gauntlet_r2l_hud updatebar(diff);
@@ -4805,7 +4805,7 @@ restrict_movement(block_walking)
     }
 }
 
-_restrict_movement_thread(restrict_movement, after_robot_eject)
+_restrict_movement_thread(restrict_movement, after_robot_eject = undefined)
 {
     TRACE("_restrict_movement_thread " + sstr(restrict_movement) + " " + sstr(after_robot_eject));
     level endon("end_of_round");
@@ -7443,7 +7443,7 @@ velocity_scale(vel, player)
     }
 }
 
-zone_friendly_name(zone)
+zone_friendly_name(zone = undefined)
 {
     TRACE(sstr(self) + " zone_friendly_name " + sstr(zone));
     if (!isdefined(zone))
