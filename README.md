@@ -18,6 +18,9 @@ storage\t6\raw\scripts\zm
 
 And paste the **[GSC file from most recent release](https://github.com/B2ORG/T6-TOMB-GAUNTLET/releases/latest)** inside of this folder. You should not have anything other than `gauntlet.gsc` and `ranked.gsc` in there.
 
+> [!TIP]
+> If you see the following message: `[ERROR]: parsing header file 'gauntlet'`, it means you've downloaded the raw code. In the release section linked above, you'll see 3 clickable names. You need to click at **gauntlet.gsc**, this will download a file. To confirm it's the right file, open it with notepad, if you see a block of random text and weird symbols below it, that's the right file. If it looks like game code (structured), that's the wrong file.
+
 # Beta
 
 This mod is (and is probably going to remain for a while) in beta, which means occasionally you may encounter some bugs. In that case, please report them either in [GitHub issues section](https://github.com/B2ORG/T6-TOMB-GAUNTLET/issues) or on [B2 Discord](b2.wtf/discord).
@@ -60,7 +63,7 @@ At some point this mod will get it's own leaderboards, for now, i'll put best re
 ## Rules
 
 - Standard round speedrun rules apply unless stated otherwise.
-- Use of any patch other than Gauntlet or any plugin is **NOT ALLOWED**
+- Use of any patch other than `gauntlet.gsc` or any plugin is **NOT ALLOWED**
 - Any modification of Gauntlet patch is **NOT ALLOWED**, the patch has to have valid [checksum](https://b2.wtf/gsc/hash), so do not cover the hash prints (left top part of the screen) on the footage
 - Using any sv_cheats protected command is **NOT ALLOWED**
 - Using external software to modify conditions of the game is **NOT ALLOWED**

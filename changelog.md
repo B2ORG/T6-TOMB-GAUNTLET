@@ -1,3 +1,7 @@
+# Beta 0.29
+
+- Fix: Unresolved external crash introduced in 0.28
+
 # Beta 0.28
 
 - Feat: Disable ability to pick up Claymore on round 29
