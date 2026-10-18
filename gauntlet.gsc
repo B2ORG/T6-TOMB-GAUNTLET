@@ -420,6 +420,7 @@ gauntlet_main_loop()
                 break;
             case 22:
                 thread wrap_gauntlet_round(::remove_and_disable_perks);
+                register_on_gauntlet_end_of_this_round(::refund_solo_qr);
                 break;
             case 23:
                 set_skip_progress_eval_for_dead();
@@ -1857,6 +1858,26 @@ giveaway_zombie_blood()
         }
     }
     level._powerup_timeout_custom_time = undefined;
+}
+
+refund_solo_qr()
+{
+    TRACE("refund_solo_qr");
+    if (level.players.size > 1)
+    {
+        return;
+    }
+    player = gethostplayer();
+    if (!isdefined(level.gauntlet_round_snapshot) || !isdefined(level.gauntlet_round_snapshot[STR(player.entity_num)]))
+    {
+        WARN("Missing snapshot when refunding qr");
+        return;
+    }
+    snap = level.gauntlet_round_snapshot[STR(player.entity_num)];
+    if (is_player_valid(player) && isinarray(snap.perks, "specialty_quickrevive"))
+    {
+        player give_perk("specialty_quickrevive");
+    }
 }
 
 powerup_round_duration(powerup)
