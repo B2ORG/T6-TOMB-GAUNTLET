@@ -152,7 +152,6 @@ setup_game()
     }
 
     level.mechz_spawning_logic_override_func = getfunction("maps/mp/zombies/_zm_ai_mechz", "enable_mechz_rounds");
-    setdvar("cg_flashScriptHashes", 1);
     setdvar("cg_drawIdentifier", 1);
 
     level.b2_gauntlet_state = 0;
@@ -236,6 +235,8 @@ setup_game()
     register_on_gauntlet_end_of_round(::clear_mechz_lock);
     register_on_gauntlet_end_of_round(::reset_skip_progress_eval_for_dead);
 
+    register_on_gauntlet_end_game(::hide_competitive_identifier);
+
     flag_wait("initial_blackscreen_passed");
 
     level.gauntlet_game_start = gettime();
@@ -289,6 +290,10 @@ gauntlet_main_loop()
     GAUNTLET_SINGLE("gauntlet_main_loop");
 
     flag_wait("initial_blackscreen_passed");
+    if (getdvar("cg_flashScriptHashes") == "0")
+    {
+        cmdexec("flashscripthashes");
+    }
 
     while (true)
     {
@@ -4155,6 +4160,12 @@ _gauntlet_end_r2l_watcher()
             player._gauntlet_r2l_hud destroyelem();
         }
     }
+}
+
+hide_competitive_identifier()
+{
+    TRACE("hide_competitive_identifier");
+    setdvar("cg_drawIdentifier", 0);
 }
 
 remove_all_perks()
