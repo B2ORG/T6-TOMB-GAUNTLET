@@ -127,6 +127,7 @@ init()
 #ifdef ENABLE_TRACERS
     fs_remove(TRACE_FILE);
 #endif
+    level notify("gauntlet_init_start");
     validate_game();
     thread run_on_gauntlet_notify();
     thread setup_game();
@@ -4343,6 +4344,12 @@ register_on_gauntlet_end_of_this_round(callback)
     level.callbacks_gauntlet_end_of_this_round[level.callbacks_gauntlet_end_of_this_round.size] = callback;
 }
 
+register_on_gauntlet_end_game(callback)
+{
+    TRACE("register_on_gauntlet_end_of_this_round " + sstr(callback));
+    level.callbacks_gauntlet_end_game[level.callbacks_gauntlet_end_game.size] = callback;
+}
+
 run_on_gauntlet_notify()
 {
     TRACE("run_on_gauntlet_notify");
@@ -4351,12 +4358,14 @@ run_on_gauntlet_notify()
     level.callbacks_gauntlet_start_of_this_round = [];
     level.callbacks_gauntlet_end_of_round = [];
     level.callbacks_gauntlet_end_of_this_round = [];
+    level.callbacks_gauntlet_end_game = [];
 
     thread _on_gauntlet_init_ready();
     thread _on_gauntlet_start_of_round();
     thread _on_gauntlet_start_of_this_round();
     thread _on_gauntlet_end_of_round();
     thread _on_gauntlet_end_of_this_round();
+    thread _on_gauntlet_end_game();
 }
 
 _on_gauntlet_init_ready()
@@ -4464,6 +4473,25 @@ _on_gauntlet_end_of_this_round()
         }
         level.callbacks_gauntlet_end_of_this_round = [];
     }
+}
+
+_on_gauntlet_end_game()
+{
+    TRACE("_on_gauntlet_end_game");
+    level endon("gauntlet_init_start");
+    level waittill("end_game");
+    foreach (callback in level.callbacks_gauntlet_end_game)
+    {
+        if (typeof(callback) == "function")
+        {
+            thread [[callback]]();
+        }
+        else
+        {
+            ERROR("end_game callback is not a function");
+        }
+    }
+    level.callbacks_gauntlet_end_game = [];
 }
 
 gauntlet_zombie_gib_all()
