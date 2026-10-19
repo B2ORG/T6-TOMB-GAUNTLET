@@ -27,7 +27,7 @@ And paste the **[GSC file from most recent release](https://github.com/B2ORG/T6-
 
 ## Beta
 
-This mod is (and is probably going to remain for a while) in beta, which means occasionally you may encounter some bugs. In that case, please report them either in [GitHub issues section](https://github.com/B2ORG/T6-TOMB-GAUNTLET/issues) or on [B2 Discord](b2.wtf/discord).
+This mod is (and is probably going to remain for a while) in beta, which means occasionally you may encounter some bugs. In that case, please report them either in [GitHub issues section](https://github.com/B2ORG/T6-TOMB-GAUNTLET/issues) or on [B2 Discord](https://b2.wtf/discord).
 
 In the current state, only Origins is supported.
 
