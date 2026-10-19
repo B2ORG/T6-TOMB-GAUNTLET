@@ -3053,35 +3053,35 @@ set_gauntlet_starting_points()
     }
 }
 
-terminate_staffs()
 find_craftable_stub_by_equipname(equipname)
 {
-    TRACE("terminate_staffs");
-    replace_func_safe("maps/mp/zm_tomb_main_quest", "can_pickup_staff", ::no);
-
-    wait 0.05;
     TRACE("find_craftable_stub_by_equipname");
     if (!isdefined(level.a_uts_craftables))
     {
         return undefined;
     }
 
-    foreach (player in get_alive_players())
     foreach (stub in level.a_uts_craftables)
     {
-        foreach (wpn in player getweaponslist())
         if (isdefined(stub) && stub.equipname == equipname)
         {
-            if (issubstr(wpn, "staff_"))
-            {
-                player takeweapon(wpn);
-            }
             return stub;
         }
     }
 
     return undefined;
 }
+
+terminate_staffs()
+{
+    // TODO add guards in long running threads that respawn triggers
+    TRACE("terminate_staffs");
+    replace_func_safe("maps/mp/zm_tomb_main_quest", "can_pickup_staff", ::no);
+    level.gautlet_unitrigger_test = ::staff_unitrigger_debounce;
+
+    wait 0.5;
+
+    players = get_alive_players();
 
     foreach (player_num, player_snapshots in level.gauntlet_round_snapshot)
     {
@@ -3100,26 +3100,81 @@ find_craftable_stub_by_equipname(equipname)
         }
     }
 
+    _terminate_base_staff("fire", 1);
+    _terminate_base_staff("air", 2);
+    _terminate_base_staff("lightning", 3);
+    _terminate_base_staff("water", 4);
+
+    if (isdefined(level.a_elemental_staffs_upgraded))
+    {
+        foreach (staff in level.a_elemental_staffs_upgraded)
+        {
+            staff notify("kill_track_staff_weapon_respawn");
+            if (isdefined(staff.trigger))
+            {
+                maps\mp\zombies\_zm_unitrigger::unregister_unitrigger(staff.trigger);
+            }
+
+            if (isdefined(staff.charge_trigger) && staff.charge_trigger != staff.trigger)
+            {
+                maps\mp\zombies\_zm_unitrigger::unregister_unitrigger(staff.charge_trigger);
+            }
+
+            staff ghost();
+            staff setinvisibletoall();
+        }
+    }
+
+    foreach (player in players)
+    {
+        foreach (wpn in player getweaponslist())
+        {
+            if (issubstr(wpn, "staff_"))
+            {
+                player takeweapon(wpn);
+            }
+        }
+    }
+
     maps\mp\zm_tomb_craftables::clear_player_staff("staff_air_zm");
     maps\mp\zm_tomb_craftables::clear_player_staff("staff_fire_zm");
     maps\mp\zm_tomb_craftables::clear_player_staff("staff_lightning_zm");
     maps\mp\zm_tomb_craftables::clear_player_staff("staff_water_zm");
 
-    maps\mp\zm_tomb_craftables::hide_staff_model();
     b2_flag_set(FLAG_STAFFS_DISABLED);
+}
 
-    // TODO disable trigger at some point
-    foreach (modelname in array("craftable_staff_fire_zm", "craftable_staff_air_zm", "craftable_staff_lightning_zm", "craftable_staff_water_zm"))
+_terminate_base_staff(staff_type, idx)
+{
+    stub = find_craftable_stub_by_equipname("elemental_staff_" + staff_type);
+    // DEBUG("stub:elemental_staff_ " + staff_type + sstr(stub));
+    if (isdefined(stub))
     {
-        model = getent(modelname, "targetname");
-        model.inused = 0;
-        // model trigger_off();
+        stub notify("kill_track_staff_weapon_respawn");
+        maps\mp\zombies\_zm_unitrigger::unregister_unitrigger(stub);
+    }
+    model = getent("craftable_staff_" + staff_type + "_zm", "targetname");
+    // DEBUG("model:craftable_staff_" + staff_type + "_zm " + sstr(model));
+    if (isdefined(model))
+    {
         model hide();
     }
-    // foreach (staff in level.a_elemental_staffs)
-    // {
-    //     staff.charge_trigger trigger_off();
-    // }
+    staff = getent("prop_staff_" + staff_type, "targetname");
+    if (isdefined(staff))
+    {
+        if (isdefined(staff.charge_trigger))
+        {
+            maps\mp\zombies\_zm_unitrigger::unregister_unitrigger(staff.charge_trigger);
+        }
+        staff ghost();
+        staff setinvisibletoall();
+        staff setclientfield("staff_charger", 0);
+    }
+    level setclientfield("quest_state" + idx, 0);
+    level setclientfield("piece_staff_zm_gem_" + staff_type, 0);
+    level setclientfield("piece_staff_zm_ustaff_"  + staff_type, 0);
+    level setclientfield("piece_staff_zm_mstaff_"  + staff_type, 0);
+    level setclientfield("piece_staff_zm_lstaff_"  + staff_type, 0);
 }
 
 disable_buildables_pickup_for_a_round()
@@ -4777,6 +4832,25 @@ gauntlet_register_static_unitrigger(unitrigger_stub, trigger_func, recalculate_z
     }
     DISABLE_DETOUR_ONCE("maps/mp/zombies/_zm_unitrigger", "register_static_unitrigger");
     [[fn]](unitrigger_stub, trigger_func, recalculate_zone);
+}
+
+staff_unitrigger_debounce(stub, trigger, recalculate_zone = undefined)
+{
+    if (!b2_flag(FLAG_STAFFS_DISABLED))
+    {
+        return true;
+    }
+    if (isdefined(stub.equipname) && issubstr(stub.equipname, "elemental_staff_"))
+    {
+        DEBUG("debounce staff unitrigger " + sstr(stub.equipname));
+        return false;
+    }
+    if (isdefined(stub.func_update_msg) && stub.func_update_msg == getfunction("maps/mp/zm_tomb_main_quest", "staff_charger_get_player_msg"))
+    {
+        DEBUG("debounce staff unitrigger " + sstr(stub.func_update_msg));
+        return false;
+    }
+    return true;
 }
 
 gauntlet_zombie_damage_callback(mod, hit_location, hit_origin, player, amount)
