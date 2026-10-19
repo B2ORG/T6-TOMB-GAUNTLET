@@ -49,6 +49,16 @@ main()
         "manage_zones",
         ::gauntlet_manage_zones
     );
+    replace_func_safe(
+        "maps/mp/zombies/_zm_unitrigger",
+        "register_unitrigger",
+        ::gauntlet_register_unitrigger
+    );
+    replace_func_safe(
+        "maps/mp/zombies/_zm_unitrigger",
+        "register_static_unitrigger",
+        ::gauntlet_register_static_unitrigger
+    );
 
     replace_func_safe(
         "maps/mp/zm_tomb_capture_zones",
@@ -281,6 +291,8 @@ setup_game()
     level._gauntlet_last_zombie_killed_time = undefined;
     /* If defined, is injected into the original callback for custom_craftable_validation*/
     level.gauntlet_custom_craftable_validation = undefined;
+    /* If defined, used to debounce unitrigger registration */
+    level.gautlet_unitrigger_test = undefined;
 
     foreach (player in level.players)
     {
@@ -4741,6 +4753,30 @@ gauntlet_zombie_gib_guts()
             self self_delete();
         }
     }
+}
+
+gauntlet_register_unitrigger(unitrigger_stub, trigger_func)
+{
+    tracer(unitrigger_stub, trigger_func);
+    if (isdefined(level.gautlet_unitrigger_test) && ![[level.gautlet_unitrigger_test]](unitrigger_stub, trigger_func))
+    {
+        DEBUG("debounce unitrigger for " + sstr(unitrigger_stub) + " " + sstr(trigger_func));
+        return;
+    }
+    DISABLE_DETOUR_ONCE("maps/mp/zombies/_zm_unitrigger", "register_unitrigger");
+    [[fn]](unitrigger_stub, trigger_func);
+}
+
+gauntlet_register_static_unitrigger(unitrigger_stub, trigger_func, recalculate_zone)
+{
+    tracer(unitrigger_stub, trigger_func, recalculate_zone);
+    if (isdefined(level.gautlet_unitrigger_test) && ![[level.gautlet_unitrigger_test]](unitrigger_stub, trigger_func, recalculate_zone))
+    {
+        DEBUG("debounce static unitrigger for " + sstr(unitrigger_stub) + " " + sstr(trigger_func));
+        return;
+    }
+    DISABLE_DETOUR_ONCE("maps/mp/zombies/_zm_unitrigger", "register_static_unitrigger");
+    [[fn]](unitrigger_stub, trigger_func, recalculate_zone);
 }
 
 gauntlet_zombie_damage_callback(mod, hit_location, hit_origin, player, amount)

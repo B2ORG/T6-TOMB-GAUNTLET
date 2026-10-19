@@ -39,6 +39,13 @@
 #define STR(__val) "" + __val
 #define JSON_ENCODE_MAX_DEPTH 3
 
+#define DISABLE_DETOUR_ONCE(__file, __fn) fn = getfunction(__file, __fn); \
+    if (!isdefined(fn)) \
+    { \
+        ERROR("Failed to disable detour for " + __fn); \
+    } \
+    disabledetouronce(fn);
+
 #define GAUNTLET_VERSION "0.29"
 #define PLUTO_MINIMAL_VERSION 5340
 #define GAUNTLET_ROUNDS 30
