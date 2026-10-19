@@ -120,6 +120,14 @@ main()
         "zombie_gib_all",
         ::gauntlet_zombie_gib_all
     );
+
+#if defined ENABLE_DEBUG && defined DEV_BUILD_CRAFTABLES
+    replace_func_safe(
+        "maps/mp/zm_tomb_quest_crypt",
+        "run_crypt_gem_pos",
+        ::run_crypt_gem_pos_free
+    );
+#endif
 }
 
 init()
@@ -1411,54 +1419,34 @@ is_weapon_upgraded_staff(weapon)
 build_tomb_staffs()
 {
     TRACE("build_tomb_staffs");
-    staff_array = [];
-    staff_array[0] = "elemental_staff_lightning";
-    staff_array[1] = "elemental_staff_fire";
-    staff_array[2] = "elemental_staff_water";
-    staff_array[3] = "elemental_staff_air";
 
     players = get_players();
-    foreach (player_idx, craftable in staff_array)
+
+    for (i = 1; i < 5; i++)
     {
-        level notify("player_teleported", players[0], player_idx + 1);
+        level notify("player_teleported", players[0], i);
         wait_network_frame();
+    }
 
-        foreach (stub in level.a_uts_craftables)
-        {
-            if (stub.craftablestub.name == craftable)
-            {
-                foreach (piece in stub.craftablespawn.a_piecespawns)
-                {
-                    piecespawn = get_craftable_piece(stub.craftablestub.name, piece.piecename);
-
-                    if (isdefined(piecespawn))
-                    {
-                        if (isdefined(players[player_idx]))
-                        {
-                            DEBUG("building tomb staff " + sstr(stub.craftablestub.name) + " " + sstr(piece.piecename) + " " + sstr(players[player_idx]) + " (" + is_true(piecespawn.piecestub.is_shared) + ")");
-                            players[player_idx] player_take_piece(piecespawn);
-                            if (eq(piece.piecename, "gem"))
-                            {
-                                players[player_idx].current_craftable_piece = piecespawn;
-                            }
-                        }
-                        else if (is_true(piecespawn.piecestub.is_shared))
-                        {
-                            DEBUG("alt building tomb staff " + sstr(piece.piecename) + " " + sstr(players[0]) + " (" + is_true(piecespawn.piecestub.is_shared) + ")");
-                            players[0] player_take_piece(piecespawn);
-                        }
-                        else
-                        {
-                            _queue_staff_gem(piecespawn);
-                        }
-                        wait_network_frame();
-                    }
-                }
-
-                break;
-            }
-        }
-        wait_network_frame();
+    fire_stub = find_craftable_stub_by_equipname("elemental_staff_fire");
+    if (isdefined(fire_stub))
+    {
+        _build_staff_stubs_internal(fire_stub, players, 0);
+    }
+    air_stub = find_craftable_stub_by_equipname("elemental_staff_air");
+    if (isdefined(air_stub))
+    {
+        _build_staff_stubs_internal(air_stub, players, 1);
+    }
+    lightning_stub = find_craftable_stub_by_equipname("elemental_staff_lightning");
+    if (isdefined(lightning_stub))
+    {
+        _build_staff_stubs_internal(lightning_stub, players, 2);
+    }
+    water_stub = find_craftable_stub_by_equipname("elemental_staff_water");
+    if (isdefined(water_stub))
+    {
+        _build_staff_stubs_internal(water_stub, players, 3);
     }
 
     while (isdefined(level._gauntlet_queue_staff_gems) && level._gauntlet_queue_staff_gems.size > 0)
@@ -1478,6 +1466,11 @@ build_tomb_staffs()
         wait 0.1;
     }
 
+    while (is_true(fire_stub.crafted) + is_true(air_stub.crafted) + is_true(lightning_stub.crafted) + is_true(water_stub.crafted) < 4)
+    {
+        wait 0.1;
+    }
+
     flag_set("electric_puzzle_1_complete");
     flag_set("electric_puzzle_2_complete");
     flag_set("air_puzzle_1_complete");
@@ -1487,57 +1480,48 @@ build_tomb_staffs()
     flag_set("ice_puzzle_1_complete");
     flag_set("ice_puzzle_2_complete");
 
-    wait_network_frame();
-    flag_set("staff_air_zm_upgrade_unlocked");
-    flag_set("staff_water_zm_upgrade_unlocked");
-    flag_set("staff_fire_zm_upgrade_unlocked");
-    flag_set("staff_lightning_zm_upgrade_unlocked");
-
-    // fn = getfunction("maps/mp/zm_tomb_quest_crypt", "chamber_disc_gem_has_clearance");
-    // replacefunc(fn, ::yes);
-    // gems = getentarray("crypt_gem", "script_noteworthy");
-    // foreach (gem in gems)
-    // {
-    //     DEBUG(sstr(gem.script_flag));
-    //     switch (gem.targetname)
-    //     {
-    //         case "crypt_gem_elec":
-    //             gem_model = maps\mp\zm_tomb_utility::puzzle_orb_chamber_to_crypt("lightning_orb_exit_path", gem);
-    //             gem_model setcandamage(1);
-    //             gem_model notify("damage", 1, gethostplayer(), undefined, undefined, undefined, undefined, undefined, undefined, "staff_lightning_zm");
-    //             break;
-    //         case "crypt_gem_ice":
-    //             gem_model = maps\mp\zm_tomb_utility::puzzle_orb_chamber_to_crypt("lightningice_orb_exit_path_orb_exit_path", gem);
-    //             gem_model setcandamage(1);
-    //             gem_model notify("damage", 1, gethostplayer(), undefined, undefined, undefined, undefined, undefined, undefined, "staff_water_zm");
-    //             break;
-    //         case "crypt_gem_air":
-    //             gem_model = maps\mp\zm_tomb_utility::puzzle_orb_chamber_to_crypt("air_orb_exit_path", gem);
-    //             gem_model setcandamage(1);
-    //             gem_model notify("damage", 1, gethostplayer(), undefined, undefined, undefined, undefined, undefined, undefined, "staff_air_zm");
-    //             break;
-    //         case "crypt_gem_fire":
-    //             gem_model = maps\mp\zm_tomb_utility::puzzle_orb_chamber_to_crypt("fire_orb_exit_path", gem);
-    //             gem_model setcandamage(1);
-    //             gem_model notify("damage", 1, gethostplayer(), undefined, undefined, undefined, undefined, undefined, undefined, "staff_air_zm");
-    //             break;
-    //     }
-    //     wait 1;
-    // }
-
-    // wait_network_frame();
-    // removedetour(fn);
-
-    // flag_wait("staff_air_zm_upgrade_unlocked");
-    // flag_wait("staff_water_zm_upgrade_unlocked");
-    // flag_wait("staff_fire_zm_upgrade_unlocked");
-    // flag_wait("staff_lightning_zm_upgrade_unlocked");
+    flag_wait("staff_air_zm_upgrade_unlocked");
+    flag_wait("staff_water_zm_upgrade_unlocked");
+    flag_wait("staff_fire_zm_upgrade_unlocked");
+    flag_wait("staff_lightning_zm_upgrade_unlocked");
 
     wait_network_frame();
     foreach (staff in level.a_elemental_staffs)
     {
+        staff.charger.is_inserted = true;
         staff.charger.charges_received = 20;
-        self.charger.is_inserted = true;
+    }
+}
+
+_build_staff_stubs_internal(stub, players, player_idx)
+{
+    foreach (piece in stub.craftablespawn.a_piecespawns)
+    {
+        piecespawn = get_craftable_piece(stub.craftablestub.name, piece.piecename);
+
+        if (isdefined(piecespawn))
+        {
+            if (isdefined(players[player_idx]))
+            {
+                DEBUG("building tomb staff " + sstr(stub.craftablestub.name) + " " + sstr(piece.piecename) + " " + sstr(players[player_idx]) + " (" + is_true(piecespawn.piecestub.is_shared) + ")");
+                players[player_idx] player_take_piece(piecespawn);
+                if (eq(piece.piecename, "gem"))
+                {
+                    players[player_idx].current_craftable_piece = piecespawn;
+                }
+            }
+            else if (is_true(piecespawn.piecestub.is_shared))
+            {
+                DEBUG("alt building tomb staff " + sstr(piece.piecename) + " " + sstr(players[0]) + " (" + is_true(piecespawn.piecestub.is_shared) + ")");
+                players[0] player_take_piece(piecespawn);
+            }
+            else
+            {
+                _queue_staff_gem(piecespawn);
+            }
+
+            wait_network_frame();
+        }
     }
 }
 
@@ -1549,6 +1533,88 @@ _queue_staff_gem(piecespawn)
         level._gauntlet_queue_staff_gems = [];
     }
     level._gauntlet_queue_staff_gems[level._gauntlet_queue_staff_gems.size] = piecespawn;
+}
+
+run_crypt_gem_pos_free()
+{
+    TRACE("run_crypt_gem_pos_free");
+    str_weapon = undefined;
+    complete_flag = undefined;
+    str_orb_path = undefined;
+    str_glow_fx = undefined;
+    n_element = self.script_int;
+
+    switch (self.targetname)
+    {
+        case "crypt_gem_air":
+            str_weapon = "staff_air_zm";
+            complete_flag = "staff_air_zm_upgrade_unlocked";
+            str_orb_path = "air_orb_exit_path";
+            str_final_pos = "air_orb_plinth_final";
+            break;
+        case "crypt_gem_ice":
+            str_weapon = "staff_water_zm";
+            complete_flag = "staff_water_zm_upgrade_unlocked";
+            str_orb_path = "ice_orb_exit_path";
+            str_final_pos = "ice_orb_plinth_final";
+            break;
+        case "crypt_gem_fire":
+            str_weapon = "staff_fire_zm";
+            complete_flag = "staff_fire_zm_upgrade_unlocked";
+            str_orb_path = "fire_orb_exit_path";
+            str_final_pos = "fire_orb_plinth_final";
+            break;
+        case "crypt_gem_elec":
+            str_weapon = "staff_lightning_zm";
+            complete_flag = "staff_lightning_zm_upgrade_unlocked";
+            str_orb_path = "lightning_orb_exit_path";
+            str_final_pos = "lightning_orb_plinth_final";
+            break;
+        default:
+            return;
+    }
+
+    e_gem_model = puzzle_orb_chamber_to_crypt(str_orb_path, self);
+    e_main_disc = getent("crypt_puzzle_disc_main", "targetname");
+    e_gem_model linkto(e_main_disc);
+    str_targetname = self.targetname;
+    self delete();
+    wait_network_frame();
+
+    e_gem_model setclientfield("element_glow_fx", n_element);
+    e_gem_model playsound("zmb_squest_crystal_charge");
+    e_gem_model playloopsound("zmb_squest_crystal_charge_loop", 2);
+
+    flag_set("disc_rotation_active");
+    level thread maps\mp\zombies\_zm_audio::sndmusicstingerevent("side_sting_5");
+    maps\mp\zm_tomb_quest_crypt::light_discs_bottom_to_top();
+    level thread puzzle_orb_pillar_show();
+    e_gem_model unlink();
+    s_ascent = getstruct("orb_crypt_ascent_path", "targetname");
+    v_next_pos = (e_gem_model.origin[0], e_gem_model.origin[1], s_ascent.origin[2]);
+    e_gem_model setclientfield("element_glow_fx", n_element);
+    playfxontag(level._effect["puzzle_orb_trail"], e_gem_model, "tag_origin");
+    e_gem_model playsound("zmb_squest_crystal_leave");
+    e_gem_model puzzle_orb_move(v_next_pos);
+    flag_clear("disc_rotation_active");
+    level thread maps\mp\zm_tomb_quest_crypt::chamber_discs_randomize();
+    e_gem_model puzzle_orb_follow_path(s_ascent);
+    v_next_pos = (e_gem_model.origin[0], e_gem_model.origin[1], e_gem_model.origin[2] + 2000);
+    e_gem_model puzzle_orb_move(v_next_pos);
+    s_chamber_path = getstruct(str_orb_path, "targetname");
+    str_model = e_gem_model.model;
+    e_gem_model delete();
+    e_gem_model = puzzle_orb_follow_return_path(s_chamber_path, n_element);
+    s_final = getstruct(str_final_pos, "targetname");
+    e_gem_model puzzle_orb_move(s_final.origin);
+    e_new_gem = spawn("script_model", s_final.origin);
+    e_new_gem setmodel(e_gem_model.model);
+    e_new_gem.script_int = n_element;
+    e_new_gem setclientfield("element_glow_fx", n_element);
+    e_gem_model delete();
+    e_new_gem playsound("zmb_squest_crystal_arrive");
+    e_new_gem playloopsound("zmb_squest_crystal_charge_loop", 0.1);
+    flag_set(complete_flag);
 }
 
 pick_up_craftable_parts(craftable)
@@ -2976,22 +3042,35 @@ set_gauntlet_starting_points()
 }
 
 terminate_staffs()
+find_craftable_stub_by_equipname(equipname)
 {
     TRACE("terminate_staffs");
     replace_func_safe("maps/mp/zm_tomb_main_quest", "can_pickup_staff", ::no);
 
     wait 0.05;
+    TRACE("find_craftable_stub_by_equipname");
+    if (!isdefined(level.a_uts_craftables))
+    {
+        return undefined;
+    }
 
     foreach (player in get_alive_players())
+    foreach (stub in level.a_uts_craftables)
     {
         foreach (wpn in player getweaponslist())
+        if (isdefined(stub) && stub.equipname == equipname)
         {
             if (issubstr(wpn, "staff_"))
             {
                 player takeweapon(wpn);
             }
+            return stub;
         }
     }
+
+    return undefined;
+}
+
     foreach (player_num, player_snapshots in level.gauntlet_round_snapshot)
     {
         if (!isdefined(player_snapshots.weapons) || !isarray(player_snapshots.weapons))
