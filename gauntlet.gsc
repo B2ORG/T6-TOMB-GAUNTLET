@@ -1216,7 +1216,7 @@ b2_flag_clear(flag, player = undefined)
     }
 }
 
-b2_flag_wait(flag, player)
+b2_flag_wait(flag, player = undefined)
 {
     TRACE("b2_flag_wait " + sstr(flag) + " " + sstr(player));
     if (typeof(player) == "entity" && isplayer(player))
