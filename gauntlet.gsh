@@ -29,6 +29,8 @@
 #define WARN(__txt) printf("WARN [" + convert_time(gettime() - getstarttime(), 1, true) + "] ^3" + __txt);
 #define ERROR(__txt) printf("ERROR [" + convert_time(gettime() - getstarttime(), 1, true) + "] ^1" + __txt);debugbox(__txt);
 
+#define UNSET "___b2unset___"
+
 #define GAUNTLET_SINGLE(__fn) level notify("gauntlet_" + __fn); \
                                 level endon("gauntlet_" + __fn);
 #define GAUNTLET_MUTEX(__fn) flag_set("m_gauntlet_" + __fn); \

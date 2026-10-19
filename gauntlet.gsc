@@ -3609,6 +3609,80 @@ _trace(txt)
     fs_fclose(f);
 }
 
+tracer(a0 = UNSET, a1 = UNSET, a2 = UNSET, a3 = UNSET, a4 = UNSET, a5 = UNSET, a6 = UNSET, a7 = UNSET, a8 = UNSET, a9 = UNSET)
+{
+#ifdef ENABLE_TRACERS
+    cs = getcallstack();
+    arrayremoveindex(cs, 0);
+
+    has_args = a0 != UNSET;
+    suffix = has_args ? " (" : " ()\n";
+    f = fs_fopen(TRACE_FILE, "append");
+    fs_write(f, add_strings(
+        convert_time(gettime() - getstarttime(), TIME_MSSVV, true),
+        " - TRACE - ",
+        sstr(cs),
+        suffix
+    ));
+    if (a0 != UNSET)
+    {
+        fs_write(f, "\n\t");
+        fs_write(f, sstr(a0));
+    }
+    if (a1 != UNSET)
+    {
+        fs_write(f, "\n\t");
+        fs_write(f, sstr(a1));
+    }
+    if (a2 != UNSET)
+    {
+        fs_write(f, "\n\t");
+        fs_write(f, sstr(a2));
+    }
+    if (a3 != UNSET)
+    {
+        fs_write(f, "\n\t");
+        fs_write(f, sstr(a3));
+    }
+    if (a4 != UNSET)
+    {
+        fs_write(f, "\n\t");
+        fs_write(f, sstr(a4));
+    }
+    if (a5 != UNSET)
+    {
+        fs_write(f, "\n\t");
+        fs_write(f, sstr(a5));
+    }
+    if (a6 != UNSET)
+    {
+        fs_write(f, "\n\t");
+        fs_write(f, sstr(a6));
+    }
+    if (a7 != UNSET)
+    {
+        fs_write(f, "\n\t");
+        fs_write(f, sstr(a7));
+    }
+    if (a8 != UNSET)
+    {
+        fs_write(f, "\n\t");
+        fs_write(f, sstr(a8));
+    }
+    if (a9 != UNSET)
+    {
+        fs_write(f, "\n\t");
+        fs_write(f, sstr(a9));
+    }
+
+    if (has_args)
+    {
+        fs_write(f, "\n)\n");
+    }
+    fs_fclose(f);
+#endif
+}
+
 _dump(object, f)
 {
     file = DUMP_FILE(getutc() + "_" + randomint(10000));
