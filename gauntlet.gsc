@@ -4071,7 +4071,7 @@ _entity_field(ent)
     {
         return "targetname=" + ent.targetname;
     }
-    return "[" + sstr(ent getfieldkeys()) + "]";
+    return "[" + (typeof(ent) == "removed entity" ? "removed entity" : sstr(ent getfieldkeys())) + "]";
 }
 
 instakill_player()
