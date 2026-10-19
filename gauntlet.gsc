@@ -3245,17 +3245,7 @@ dynamic_round()
                 specific_powerup_drop("zombie_blood", DROP_UPPER);
                 break;
             case 2:
-                foreach (player in players)
-                {
-                    if (is_player_valid(player))
-                    {
-                        player give_perk_ordered();
-                        if (player get_perk_array().size < 4)
-                        {
-                            player give_perk_ordered();
-                        }
-                    }
-                }
+                array_thread(players, ::give_perk_ordered);
                 specific_powerup_drop("full_ammo", drop_location);
                 break;
             case 3:
@@ -3282,42 +3272,53 @@ dynamic_round()
 
 give_perk_ordered()
 {
-    TRACE(sstr(self) + " give_perk_ordered");
-    if (!self hasperk("specialty_armorvest"))
+    tracer();
+    self endon("disconnect");
+
+    for (count = self get_perk_array().size < 3 ? 2 : 1; count > 0; count--)
     {
-        self give_perk("specialty_armorvest");
-    }
-    else if (!self hasperk("specialty_rof"))
-    {
-        self give_perk("specialty_rof");
-    }
-    else if (!self hasperk("specialty_fastreload"))
-    {
-        self give_perk("specialty_fastreload");
-    }
-    else if (!self hasperk("specialty_quickrevive"))
-    {
-        self give_perk("specialty_quickrevive");
-    }
-    else if (!self hasperk("specialty_longersprint"))
-    {
-        self give_perk("specialty_longersprint");
-    }
-    else if (!self hasperk("specialty_deadshot"))
-    {
-        self give_perk("specialty_deadshot");
-    }
-    else if (!self hasperk("specialty_flakjacket"))
-    {
-        self give_perk("specialty_flakjacket");
-    }
-    else if (!self hasperk("specialty_grenadepulldeath"))
-    {
-        self give_perk("specialty_grenadepulldeath");
-    }
-    else if (!self hasperk("specialty_additionalprimaryweapon"))
-    {
-        self give_perk("specialty_additionalprimaryweapon");
+        if (!is_player_valid(self))
+        {
+            DEBUG("invalid player give_perk_ordered");
+            break;
+        }
+
+        if (!self hasperk("specialty_armorvest"))
+        {
+            self give_perk("specialty_armorvest");
+        }
+        else if (!self hasperk("specialty_rof"))
+        {
+            self give_perk("specialty_rof");
+        }
+        else if (!self hasperk("specialty_fastreload"))
+        {
+            self give_perk("specialty_fastreload");
+        }
+        else if (!self hasperk("specialty_quickrevive"))
+        {
+            self give_perk("specialty_quickrevive");
+        }
+        else if (!self hasperk("specialty_longersprint"))
+        {
+            self give_perk("specialty_longersprint");
+        }
+        else if (!self hasperk("specialty_deadshot"))
+        {
+            self give_perk("specialty_deadshot");
+        }
+        else if (!self hasperk("specialty_flakjacket"))
+        {
+            self give_perk("specialty_flakjacket");
+        }
+        else if (!self hasperk("specialty_grenadepulldeath"))
+        {
+            self give_perk("specialty_grenadepulldeath");
+        }
+        else if (!self hasperk("specialty_additionalprimaryweapon"))
+        {
+            self give_perk("specialty_additionalprimaryweapon");
+        }
     }
 }
 
