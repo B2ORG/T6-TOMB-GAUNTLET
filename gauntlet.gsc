@@ -1395,6 +1395,19 @@ take_craftable(craftable, player = undefined)
     }
 }
 
+is_weapon_upgraded_staff(weapon)
+{
+    if (issubstr(weapon, "_upgraded3_"))
+    {
+        return 2;
+    }
+    if (issubstr(weapon, "_upgraded2_"))
+    {
+        return 1;
+    }
+    return 0;
+}
+
 build_tomb_staffs()
 {
     TRACE("build_tomb_staffs");
@@ -5849,12 +5862,15 @@ double_ammo_consumption()
 
     players = get_players();
 
+    replace_func_safe("maps/mp/zm_tomb_craftables", "quadrotor_timer", ::_half_quadrotor_timer);
+
     array_thread(players, ::_sub_ammo_on_fire);
     /* There are no missiles on origins that don't already fire normal wpn notifier */
     // array_thread(players, ::_sub_ammo_on_missile);
     array_thread(players, ::_sub_ammo_on_grenade);
 
     level waittill("end_of_round");
+    remove_detour_safe("maps/mp/zm_tomb_craftables", "quadrotor_timer");
     set_status(CHALLENGE_STATUS_SUCCESS);
 }
 
@@ -5869,13 +5885,47 @@ _sub_ammo(weapon, sub, ref)
     clip = self getweaponammoclip(weapon);
     stock = self getweaponammostock(weapon);
     // DEBUG("_sub_ammo sub=" + sstr(sub) + " clip=" + sstr(clip) + " stock=" + sstr(stock) + " weapon=" + sstr(weapon));
-    if (clip > sub)
+    if (clip > sub || is_placeable_mine(weapon))
     {
         self setweaponammoclip(weapon, max_int(0, clip - sub));
     }
     else
     {
         self setweaponammostock(weapon, max_int(0, stock - sub));
+    }
+
+    if (!maps\mp\gametypes_zm\_weapons::isprimaryweapon(weapon) 
+        && !is_placeable_mine(weapon) 
+        && !isinarray(array("staff_revive_zm"), weapon)
+    ) {
+        return;
+    }
+
+    total = is_placeable_mine(weapon)
+        ? self getweaponammoclip(weapon)
+        : self getweaponammoclip(weapon) + self getweaponammostock(weapon);
+    if (total - sub <= 0)
+    {
+        toggled = false;
+        foreach (wpn_to_toggle_to in self getweaponslistprimaries())
+        {
+            if (wpn_to_toggle_to == weapon)
+            {
+                continue;
+            }
+            if (self getweaponammoclip(wpn_to_toggle_to) + self getweaponammostock(wpn_to_toggle_to) > 0)
+            {
+                // DEBUG("toggling to " + wpn_to_toggle_to);
+                toggled = true;
+                self switchtoweapon(wpn_to_toggle_to);
+                break;
+            }
+        }
+
+        if (is_placeable_mine(weapon) && !toggled)
+        {
+            self switchtoweapon(self getweaponslistprimaries()[0]);
+        }
     }
 }
 
@@ -5890,13 +5940,13 @@ _sub_ammo_on_fire()
     {
         self waittill("weapon_fired", weapon);
         sub = 1;
-        if (issubstr(weapon, "_upgraded3_"))
+        if (is_weapon_upgraded_staff(weapon) == 2)
         {
             tokens = strtok(weapon, "_");
             weapon = add_strings(tokens[0], "_", tokens[1], "_upgraded_zm");
             sub = 6;
         }
-        else if (issubstr(weapon, "_upgraded2_"))
+        else if (is_weapon_upgraded_staff(weapon) == 1)
         {
             tokens = strtok(weapon, "_");
             weapon = add_strings(tokens[0], "_", tokens[1], "_upgraded_zm");
@@ -5917,15 +5967,7 @@ _sub_ammo_on_missile()
     while (true)
     {
         self waittill("missile_fire", missile, weapon);
-        sub = 1;
-        if (issubstr(weapon, "_upgraded3_"))
-        {
-            sub = 6;
-        }
-        else if (issubstr(weapon, "_upgraded2_"))
-        {
-            sub = 3;
-        }
+        sub = max_int(is_weapon_upgraded_staff(weapon) * 3, 1);
 
         self _sub_ammo(weapon, sub, "missile_fire");
     }
@@ -5946,8 +5988,27 @@ _sub_ammo_on_grenade()
         {
             continue;
         }
+        /* Mine still triggers normal notifier */
+        if (is_placeable_mine(weapon))
+        {
+            continue;
+        }
         self _sub_ammo(weapon, 1, "grenade_fire");
     }
+}
+
+_half_quadrotor_timer()
+{
+    TRACE("_half_quadrotor_timer");
+    self endon("death");
+    level endon("drone_available");
+    wait 40;
+    vox_line = "vox_maxi_drone_cool_down_" + randomintrange(0, 2);
+    self thread maps\mp\zm_tomb_vo::maxissay(vox_line, self);
+    wait 5;
+    vox_line = "vox_maxi_drone_cool_down_2";
+    self thread maps\mp\zm_tomb_vo::maxissay(vox_line, self);
+    level notify("drone_should_return");
 }
 
 absurd_powerups()
