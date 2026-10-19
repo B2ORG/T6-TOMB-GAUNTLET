@@ -2,7 +2,11 @@
 
 This mod is my take on BO4 Gauntlet gamemode in Black Ops II. It consists of 30 rounds where players have to face 30 different challenges. The goal is to complete/survive all challenges as fast as possible.
 
-# Mod & Installation
+## Content
+
+There are multiple videos of people trying or speedrunning Gauntlet, I've compiled [a playlist](https://www.youtube.com/playlist?list=PLLXp8aYEtY3o) of videos I've come across. I love watching people running the mod, if you make a video, make sure to let me know on Discord.
+
+## Mod & Installation
 
 This mod is created for Plutonium. Make sure you're running the most recent Plutonium version, otherwise the mod may not work. To install the mod, go to the Plutonium directory, to do that, press windows key + `r` on your keyboard, and type in
 
@@ -21,61 +25,52 @@ And paste the **[GSC file from most recent release](https://github.com/B2ORG/T6-
 > [!TIP]
 > If you see the following message: `[ERROR]: parsing header file 'gauntlet'`, it means you've downloaded the raw code. In the release section linked above, you'll see 3 clickable names. You need to click at **gauntlet.gsc**, this will download a file. To confirm it's the right file, open it with notepad, if you see a block of random text and weird symbols below it, that's the right file. If it looks like game code (structured), that's the wrong file.
 
-# Beta
+## Beta
 
 This mod is (and is probably going to remain for a while) in beta, which means occasionally you may encounter some bugs. In that case, please report them either in [GitHub issues section](https://github.com/B2ORG/T6-TOMB-GAUNTLET/issues) or on [B2 Discord](b2.wtf/discord).
 
 In the current state, only Origins is supported.
 
-# Challenges
+## Challenges
 
 The challenge is shown to the players at the beginning of each round by sending the description in the game chat. Make sure the game chat is enabled. In case of missing it, you may send the question mark `?` in the game chat, in which case it's going to be repeated. If the host has been on a specific round before, players can put a round number after the question mark, to see what challenge is going to be on that round, like so `? 2`
 
-# Leaderboards
+## Leaderboards
 
-At some point this mod will get it's own leaderboards, for now, i'll put best results here (from version beta 0.2 onwards), as long as they follow the rules
+At some point this mod will get it's own leaderboards, for now, i'll put best results here (from version beta 0.2 onwards), [check rules](https://b2.wtf/rules/b2-gauntlet/t6-gauntlet/origins) for competitive speedruns.
 
-## Solo completions
+### Solo completions
 
 | Time | Players | Version | Ft flags |
 | :---: | :--- | :---: | :---: |
 | [37.07.60](https://youtu.be/W9LmFmlxNf4) | DankSlushie | 0.27 | 166136 3844 |
 | [38:19.45](https://www.twitch.tv/videos/2789359759) | Tima | 0.27 | 166136 3844 |
 
-## 2p completions
+### 2p completions
 
 | Time | Players | Version | Ft flags |
 | :---: | :--- | :---: | :---: |
 | [49:28.85](https://youtu.be/siYzIE4XrXA) | Huth & Tima | 0.26 | 186 2 12 |
 
-## 3p completions
+### 3p completions
 
 | Time | Players | Version | Ft flags |
 | :---: | :--- | :---: | :---: |
 | [1:21:17.90](https://youtu.be/dCXBeAY4L1U) | Huth, Tima & DankSlushie | 0.26 | 186 10 2 134 |
 
-## 4p completions
+### 4p completions
 
 | Time | Players | Version | Ft flags |
 | :---: | :--- | :---: | :---: |
 | [1:51:33.85](https://youtu.be/itaj26etQXw) | Zi0, Huth, Tima & DankSlushie | 0.24 | 186 6 10 10 10 |
 
-## Rules
-
-- Standard round speedrun rules apply unless stated otherwise.
-- Use of any patch other than `gauntlet.gsc` or any plugin is **NOT ALLOWED**
-- Any modification of Gauntlet patch is **NOT ALLOWED**, the patch has to have valid [checksum](https://b2.wtf/gsc/hash), so do not cover the hash prints (left top part of the screen) on the footage
-- Using any sv_cheats protected command is **NOT ALLOWED**
-- Using external software to modify conditions of the game is **NOT ALLOWED**
-- Games require full gameplay (in coop, at the very least a game host perspective is required). Alternatively, a demo file will be honored.
-- In case of gamebreaking bugs that have not yet been discovered, the game may be deemed invalid if competing with the result once the bug is fixed is impossible.
-- Games with 5 players or more in the lobby won't be honored.
-
 ## Cheatsheet
 
 If you want to enjoy the experience of discovering the gauntlet, you should not be using this, but if you want to compete for time, [this document](https://github.com/B2ORG/T6-TOMB-GAUNTLET/blob/main/cheat_sheet.md) explains each of the challenge rounds and most of the additional mechanics.
 
-# Credits
+## Credits
+
+The initial idea came from [here](https://www.reddit.com/r/CODZombies/comments/atxklw/cod_bo3bo2_origins_gauntlet/).
 
 People who helped developing this mod, either by contributing code or testing stuff.
 - [Txchno](https://github.com/mbahgatTech)

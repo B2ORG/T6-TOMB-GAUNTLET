@@ -46,8 +46,8 @@
     } \
     disabledetouronce(fn);
 
-#define GAUNTLET_VERSION "0.29"
-#define PLUTO_MINIMAL_VERSION 5340
+#define GAUNTLET_VERSION "0.30"
+#define PLUTO_MINIMAL_VERSION 5354
 #define GAUNTLET_ROUNDS 30
 #define MAX_STRING_LEN 8191
 #define WALLPOWER_TILL_ROUND 29

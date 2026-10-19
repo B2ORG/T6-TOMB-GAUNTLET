@@ -1,3 +1,12 @@
+# Beta 0.30
+
+- Feat: QR is returned on round 22 if player had it already in solo
+- Feat: Competitive DVARs are no longer set in favor of manual checks
+- Feat: Improved autoswapping weapons on round 26 when ammo count gets to 0
+- Feat: Staffs are now properly hidden and disabled on round 29
+- Feat: Zombie counter can no longer go above initial zombie count for the round on round 30
+- Fix: Fixed blocking calls on round 30 which resulted on stage duration being slightly inconsistent
+
 # Beta 0.29
 
 - Fix: Unresolved external crash introduced in 0.28
