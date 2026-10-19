@@ -3223,7 +3223,7 @@ dynamic_round()
     level endon("end_game");
 
     level waittill("gauntlet_begin_protecting_zone");
-    zombie_count = get_round_count();
+    max_count = get_round_count() - 24;
     players = get_players();
     level.zombie_vars["zombie_powerup_drop_max_per_round"] = 0;
     level.mechz_should_drop_powerup = false;
@@ -3275,7 +3275,7 @@ dynamic_round()
 
         if (level.zombie_total > 0)
         {
-            level.zombie_total += 20;
+            level.zombie_total = min_int(level.zombie_total + 20, max_count);
         }
     }
 }
