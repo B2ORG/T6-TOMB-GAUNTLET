@@ -1791,10 +1791,11 @@ unlock_drone()
             continue;
         }
 
-        craftable = get_current_drone_craftable();
-        if (isdefined(craftable) && isdefined(craftable.stub.craftablestub.use_actionslot))
+        // TODO test
+        drone_stub = find_craftable_stub_by_equipname("equip_dieseldrone_zm");
+        if (isdefined(drone_stub) && isdefined(drone_stub.craftablestub.use_actionslot))
         {
-            player setactionslot(craftable.stub.craftablestub.use_actionslot, "weapon", "equip_dieseldrone_zm");
+            player setactionslot(drone_stub.craftablestub.use_actionslot, "weapon", "equip_dieseldrone_zm");
         }
         else
         {
@@ -1807,23 +1808,6 @@ debounce_drone_damage(inflictor, attacker, damage, flags, meansofdeath, weapon, 
 {
     TRACE(sstr(self) + " debounce_drone_damage_for_a_round " + sstr(inflictor) + " " + sstr(attacker) + " " + sstr(damage) + " " + sstr(flags) + " " + sstr(meansofdeath) + " " + sstr(weapon) + " " + sstr(vpoint) + " " + sstr(vdir) + " " + sstr(shitloc) + " " + sstr(psoffsettime) + " " + sstr(boneindex));
     return eq(weapon, "quadrotorturret_zm") ? 0 : damage;
-}
-
-get_current_drone_craftable()
-{
-    TRACE("get_current_drone_craftable");
-    craftable_with_drone = undefined;
-    foreach (craftable_unitrigger in level.a_uts_craftables)
-    {
-        craftable = craftable_unitrigger.craftablespawn.stub.craftablespawn;
-        // DEBUG(sstr(craftable));
-        if (!isdefined(craftable) || !isdefined(craftable.stub) || !eq(craftable.stub.weaponname, "equip_dieseldrone_zm"))
-        {
-            continue;
-        }
-        return craftable;
-    }
-    return undefined;
 }
 
 drone_craftable_disable(player)
