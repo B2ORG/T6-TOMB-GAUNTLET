@@ -158,7 +158,7 @@ init()
 
 setup_game()
 {
-    TRACE("setup_game");
+    tracer();
 
     if (isdefined(level.b2_sniff))
     {
@@ -304,7 +304,7 @@ setup_game()
 
 gauntlet_main_loop()
 {
-    TRACE("gauntlet_main_loop");
+    tracer();
     level endon("end_game");
     level endon("gauntlet_reboot");
     GAUNTLET_SINGLE("gauntlet_main_loop");
@@ -500,7 +500,7 @@ gauntlet_main_loop()
 
 wrap_gauntlet_round(gauntlet_fn, a1 = undefined, a2 = undefined, a3 = undefined)
 {
-    TRACE("wrap_gauntlet_round " + sstr(gauntlet_fn) + " " + sstr(a1) + " " + sstr(a2) + " " + sstr(a3));
+    tracer(gauntlet_fn, a1, a2, a3);
     level endon("end_game");
     level endon("start_of_round");
 
@@ -3763,7 +3763,8 @@ tracer(a0 = UNSET, a1 = UNSET, a2 = UNSET, a3 = UNSET, a4 = UNSET, a5 = UNSET, a
     arrayremoveindex(cs, 0);
 
     has_args = a0 != UNSET;
-    suffix = has_args ? " (" : " ()\n";
+    is_method = !eq(self, level);
+    suffix = has_args || is_method ? " (" : " ()\n";
     f = fs_fopen(TRACE_FILE, "append");
     fs_write(f, add_strings(
         convert_time(gettime() - getstarttime(), TIME_MSSVV, true),
@@ -3771,6 +3772,12 @@ tracer(a0 = UNSET, a1 = UNSET, a2 = UNSET, a3 = UNSET, a4 = UNSET, a5 = UNSET, a
         sstr(cs),
         suffix
     ));
+    if (is_method)
+    {
+        fs_write(f, "\n\tON ");
+        fs_write(f, sstr(self));
+    }
+
     if (a0 != UNSET)
     {
         fs_write(f, "\n\t");
@@ -3822,7 +3829,7 @@ tracer(a0 = UNSET, a1 = UNSET, a2 = UNSET, a3 = UNSET, a4 = UNSET, a5 = UNSET, a
         fs_write(f, sstr(a9));
     }
 
-    if (has_args)
+    if (has_args || is_method)
     {
         fs_write(f, "\n)\n");
     }
@@ -7143,6 +7150,7 @@ gauntlet_staff_lightning_death_event()
 
 gauntlet_player_out_of_playable_area_monitor()
 {
+    tracer();
     self notify("stop_player_out_of_playable_area_monitor");
     self endon("stop_player_out_of_playable_area_monitor");
     self endon("disconnect");
